@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Catálogo de Equipos</h2>
+</div>
+
+<div class="row">
+    {% for equipo in equipos %}
+    <div class="col-md-4 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">{{ equipo.nombre }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">Código: {{ equipo.codigo }}</h6>
+                <p class="card-text">
+                    <strong>Categoría:</strong> {{ equipo.categoria.nombre }}<br>
+                    <strong>Stock:</strong> {{ equipo.stock }}<br>
+                    
+                    <!-- Lógica visual según el estado -->
+                    <strong>Estado:</strong> 
+                    {% if equipo.estado == 'disponible' %}
+                        <span class="badge bg-success">{{ equipo.get_estado_display }}</span>
+                    {% elif equipo.estado == 'prestado' %}
+                        <span class="badge bg-warning text-dark">{{ equipo.get_estado_display }}</span>
+                    {% else %}
+                        <span class="badge bg-danger">{{ equipo.get_estado_display }}</span>
+                    {% endif %}
+                </p>
+                
+                {% if equipo.estado == 'disponible' %}
+                    <a href="#" class="btn btn-primary w-100">Reservar Equipo</a>
+                {% else %}
+                    <button class="btn btn-secondary w-100" disabled>No Disponible</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info">No hay equipos registrados en el pañol aún.</div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
