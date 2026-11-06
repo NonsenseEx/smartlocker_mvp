@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">Mis Préstamos Activos</h2>
+
+<div class="row">
+    {% for prestamo in prestamos %}
+    <div class="col-md-6 mb-3">
+        <div class="card shadow-sm border-warning">
+            <div class="card-header bg-warning text-dark">
+                Equipo: {{ prestamo.reserva.equipo.nombre }}
+            </div>
+            <div class="card-body">
+                <p><strong>Fecha de salida:</strong> {{ prestamo.fecha_salida|date:"d M Y, H:i" }}</p>
+                <p><strong>Fecha límite:</strong> {{ prestamo.fecha_limite|date:"d M Y, H:i" }}</p>
+                <a href="{% url 'devolver_mi_equipo' prestamo.id %}" class="btn btn-danger w-100">Devolver Equipo</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info">No tienes préstamos activos en este momento.</div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

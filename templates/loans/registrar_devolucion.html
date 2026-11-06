@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6">
+        <div class="card shadow border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0">Registrar Devolución</h4>
+            </div>
+            <div class="card-body">
+                <h5>Equipo: {{ prestamo.reserva.equipo.nombre }}</h5>
+                <p class="text-muted">Código: {{ prestamo.reserva.equipo.codigo }}</p>
+                <p><strong>Prestado a:</strong> {{ prestamo.reserva.usuario.username }}</p>
+                <p><strong>Fecha Límite:</strong> {{ prestamo.fecha_limite|date:"d M Y, H:i" }}</p>
+                <hr>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Estado del equipo al recibirlo:</label>
+                        <select name="estado_equipo" class="form-select" required>
+                            <option value="">-- Seleccione --</option>
+                            <option value="operativo">Operativo (Buen estado)</option>
+                            <option value="danado">Dañado (Requiere mantenimiento)</option>
+                            <option value="faltante">Faltante (Componentes perdidos)</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-warning w-100 text-dark font-weight-bold">Finalizar Devolución</button>
+                    <a href="{% url 'catalogo' %}" class="btn btn-secondary w-100 mt-2">Cancelar</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -18,6 +18,9 @@
                             <span class="nav-link text-white">Hola, {{ user.username }} ({{ user.get_rol_display }})</span>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link text-warning fw-bold" href="{% url 'mis_prestamos' %}">Mis Préstamos</a>
+                        </li>
+                        <li class="nav-item">
                             <!-- Formulario seguro para cerrar sesión -->
                             <form action="{% url 'logout' %}" method="post" class="d-inline">
                                 {% csrf_token %}
