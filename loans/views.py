@@ -12,12 +12,11 @@ from .models import Reserva, Prestamo
 def crear_reserva(request, equipo_id):
     equipo = get_object_or_404(Equipo, id=equipo_id)
     
-    # 1. REGLA DE NEGOCIO: Validar si el usuario tiene sanción (RF-04)
     if request.user.tiene_sancion_activa:
         messages.error(request, "Usuario Suspendido: No puedes realizar reservas porque tienes una sanción activa.")
         return redirect('catalogo')
         
-    # 2. Validar que el equipo esté disponible
+    #  Equipo está disponible ?
     if equipo.estado != 'disponible':
         messages.warning(request, "El equipo no está disponible actualmente.")
         return redirect('catalogo')
