@@ -30,3 +30,16 @@ class EditarPerfilForm(UserChangeForm):
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
         }
+
+class AdminEditarUsuarioForm(forms.ModelForm):
+    class Meta:
+        model = Usuario
+        fields = ['first_name', 'last_name', 'email', 'rol', 'tiene_sancion_activa', 'fecha_fin_sancion']
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'rol': forms.Select(attrs={'class': 'form-select'}),
+            'tiene_sancion_activa': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'fecha_fin_sancion': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
+        }

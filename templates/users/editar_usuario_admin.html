@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white">
+                <h4 class="mb-0">Editando a: {{ usuario_editado.username }}</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                        {% if field.name == 'tiene_sancion_activa' %}
+                            <div class="mb-3 form-check form-switch">
+                                {{ field }}
+                                <label class="form-check-label text-danger fw-bold">{{ field.label }} (Suspender cuenta)</label>
+                            </div>
+                        {% else %}
+                            <div class="mb-3">
+                                <label class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <div class="form-text text-muted">{{ field.help_text }}</div>
+                                {% endif %}
+                                {% if field.errors %}
+                                    <div class="text-danger">{{ field.errors }}</div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    <div class="alert alert-info">
+                        <small><strong>Nota:</strong> Si activas la casilla de suspensión, asegúrate de poner una fecha de fin para que el sistema levante el castigo automáticamente.</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Guardar Cambios</button>
+                    <a href="{% url 'gestion_usuarios' %}" class="btn btn-secondary w-100 mt-2">Cancelar</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

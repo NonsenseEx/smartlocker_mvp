@@ -36,3 +36,30 @@ def editar_perfil(request):
         form = EditarPerfilForm(instance=request.user)
         
     return render(request, 'users/editar_perfil.html', {'form': form})
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from .forms import AdminEditarUsuarioForm
+from users.decorators import role_required
+from .models import Usuario
+
+@role_required('administrador')
+def gestion_usuarios(request):
+    # Traemos a todos los usuarios ordenados por rol
+    usuarios = Usuario.objects.all().order_by('rol', 'username')
+    return render(request, 'users/gestion_usuarios.html', {'usuarios': usuarios})
+
+@role_required('administrador')
+def editar_usuario_admin(request, user_id):
+    usuario = get_object_or_404(Usuario, id=user_id)
+    
+    if request.method == 'POST':
+        form = AdminEditarUsuarioForm(request.POST, instance=usuario)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"El perfil de {usuario.username} ha sido actualizado.")
+            return redirect('gestion_usuarios')
+    else:
+        form = AdminEditarUsuarioForm(instance=usuario)
+        
+    return render(request, 'users/editar_usuario_admin.html', {'form': form, 'usuario_editado': usuario})

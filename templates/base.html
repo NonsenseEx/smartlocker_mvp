@@ -24,17 +24,22 @@
                             <a class="nav-link text-warning fw-bold" href="{% url 'mis_prestamos' %}">Mis Préstamos</a>
                         </li>
                         
-                        {% if user.rol == 'encargado' or user.rol == 'administrador' %}
+{% if user.rol == 'encargado' or user.rol == 'administrador' %}
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-info fw-bold" href="#" id="menuGestion" role="button" data-bs-toggle="dropdown">
+                                <a class="nav-link dropdown-toggle text-info fw-bold" href="#" id="menuGestion" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     ⚙️ Gestión
                                 </a>
-                                <ul class="dropdown-menu" aria-labelledby="menuGestion">
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuGestion">
                                     <li><a class="dropdown-item" href="{% url 'panel_encargado' %}">Panel de Despacho</a></li>
                                     <li><a class="dropdown-item" href="{% url 'gestion_inventario' %}">Inventario Completo</a></li>
                                     <li><a class="dropdown-item" href="{% url 'equipos_defectuosos' %}">Equipos Defectuosos</a></li>
-                                    <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" href="{% url 'registro_reportes' %}">Registro de Reportes</a></li>
+                                    
+                                    <!-- SOLO PARA ADMINISTRADOR -->
+                                    {% if user.rol == 'administrador' %}
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-primary fw-bold" href="{% url 'gestion_usuarios' %}">👥 Gestión de Usuarios</a></li>
+                                    {% endif %}
                                 </ul>
                             </li>
                         {% endif %}
