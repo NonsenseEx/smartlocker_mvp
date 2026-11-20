@@ -8,22 +8,38 @@
 </head>
 <body class="bg-light">
     <!-- Barra de navegación -->
+    <!-- Barra de navegación -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="{% url 'catalogo' %}">🔒 SmartLocker</a>
-            <div class="collapse navbar-collapse">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
                     {% if user.is_authenticated %}
+                        
+                        <!-- Botón Mis Préstamos -->
                         <li class="nav-item">
                             <a class="nav-link text-warning fw-bold" href="{% url 'mis_prestamos' %}">Mis Préstamos</a>
                         </li>
+                        
                         {% if user.rol == 'encargado' or user.rol == 'administrador' %}
-                        <li class="nav-item">
-                            <a class="nav-link text-info fw-bold" href="{% url 'panel_encargado' %}">Panel Encargado</a>
-                        </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-info fw-bold" href="#" id="menuGestion" role="button" data-bs-toggle="dropdown">
+                                    ⚙️ Gestión
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="menuGestion">
+                                    <li><a class="dropdown-item" href="{% url 'panel_encargado' %}">Panel de Despacho</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'gestion_inventario' %}">Inventario Completo</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'equipos_defectuosos' %}">Equipos Defectuosos</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{% url 'registro_reportes' %}">Registro de Reportes</a></li>
+                                </ul>
+                            </li>
                         {% endif %}
                         
-                        <!-- NUEVO: Menú desplegable de usuario -->
+                        <!-- Menú desplegable de usuario -->
                         <li class="nav-item dropdown ms-3">
                             <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Hola, {{ user.first_name|default:user.username }}
@@ -39,7 +55,9 @@
                                 </li>
                             </ul>
                         </li>
+
                     {% else %}
+                        <!-- Botones si NO está logueado -->
                         <li class="nav-item">
                             <a class="nav-link text-white" href="{% url 'login' %}">Iniciar Sesión</a>
                         </li>

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>📋 Gestión de Inventario</h2>
+    {% if user.rol == 'administrador' %}
+    <div>
+        <a href="{% url 'equipos_defectuosos' %}" class="btn btn-warning me-2">🛠️ Ver Defectuosos</a>
+        {% if user.rol == 'administrador' %}
+            <a href="{% url 'crear_equipo' %}" class="btn btn-success">➕ Agregar Nuevo Equipo</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<div class="card shadow">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Stock</th>
+                        <th>Estado</th>
+                        {% if user.rol == 'administrador' %}
+                        <th>Acciones</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for equipo in equipos %}
+                    <tr>
+                        <td><code>{{ equipo.codigo }}</code></td>
+                        <td>{{ equipo.nombre }}</td>
+                        <td>{{ equipo.categoria.nombre }}</td>
+                        <td><span class="badge {% if equipo.stock > 0 %}bg-success{% else %}bg-danger{% endif %}">{{ equipo.stock }}</span></td>
+                        <td>{{ equipo.get_estado_display }}</td>
+                        {% if user.rol == 'administrador' %}
+                        <td>
+                            <a href="{% url 'editar_equipo' equipo.id %}" class="btn btn-primary btn-sm">✏️ Editar</a>
+                            <a href="{% url 'eliminar_equipo' equipo.id %}" class="btn btn-danger btn-sm">🗑️ Borrar</a>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

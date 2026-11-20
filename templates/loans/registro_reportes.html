@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>📋 Registro de Reportes e Incidentes</h2>
+    <a href="{% url 'panel_encargado' %}" class="btn btn-outline-secondary">← Volver al Panel</a>
+</div>
+
+<div class="card shadow">
+    <div class="card-body">
+        {% if reportes %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Usuario Afectado</th>
+                        <th>Equipo</th>
+                        <th>Tipo de Incidente</th>
+                        <th>Detalle</th>
+                        <th>Reportado por</th>
+                        <th>¿Bloqueado?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reporte in reportes %}
+                    <tr>
+                        <td>{{ reporte.fecha_reporte|date:"d M Y H:i" }}</td>
+                        <td>
+                            <strong>{{ reporte.prestamo.reserva.usuario.username }}</strong>
+                        </td>
+                        <td>{{ reporte.prestamo.reserva.equipo.nombre }}</td>
+                        <td>
+                            {% if reporte.tipo == 'robo' %}
+                                <span class="badge bg-danger">Robo / Pérdida</span>
+                            {% elif reporte.tipo == 'dano' %}
+                                <span class="badge bg-warning text-dark">Daño</span>
+                            {% elif reporte.tipo == 'atraso' %}
+                                <span class="badge bg-info text-dark">Atraso</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Otro</span>
+                            {% endif %}
+                        </td>
+                        <td><small>{{ reporte.descripcion }}</small></td>
+                        <td>{{ reporte.encargado.username|default:"Sistema" }}</td>
+                        <td>
+                            {% if reporte.bloqueo_aplicado %}
+                                <span class="badge bg-danger">Sí</span>
+                            {% else %}
+                                <span class="badge bg-success">No</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info mb-0">
+            No hay reportes de incidentes registrados en el sistema.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

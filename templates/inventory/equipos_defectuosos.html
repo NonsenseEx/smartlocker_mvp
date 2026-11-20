@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>🛠️ Equipos en Mantenimiento (Defectuosos)</h2>
+    <a href="{% url 'gestion_inventario' %}" class="btn btn-outline-secondary">← Volver al Inventario</a>
+</div>
+
+<div class="card shadow">
+    <div class="card-body">
+        {% if equipos %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Código</th>
+                        <th>Equipo</th>
+                        <th>Categoría</th>
+                        <th>Stock Actual</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for equipo in equipos %}
+                    <tr>
+                        <td><code>{{ equipo.codigo }}</code></td>
+                        <td>{{ equipo.nombre }}</td>
+                        <td>{{ equipo.categoria.nombre }}</td>
+                        <td><span class="badge bg-danger">{{ equipo.stock }}</span></td>
+                        <td><span class="badge bg-warning text-dark">{{ equipo.get_estado_display }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-success mb-0">
+            ¡Buenas noticias! No hay equipos defectuosos en mantenimiento actualmente.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

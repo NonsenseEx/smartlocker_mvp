@@ -26,9 +26,9 @@ def crear_reserva(request, equipo_id):
             messages.error(request, f"Usuario Suspendido: No puedes reservar porque tienes una sanción activa hasta el {fecha_fin}.")
             return redirect('catalogo')
         
-    # 2. Validar que el equipo esté disponible
-    if equipo.estado != 'disponible':
-        messages.warning(request, "El equipo no está disponible actualmente.")
+    # 2. Validar que el equipo tenga stock disponible (aunque algunas piezas estén en mantenimiento)
+    if equipo.stock <= 0:
+        messages.warning(request, "El equipo no tiene stock disponible actualmente.")
         return redirect('catalogo')
 
     if request.method == 'POST':
@@ -115,13 +115,21 @@ def registrar_devolucion(request, prestamo_id):
 
             prestamo.save()
             
-            # Sumamos el stock de vuelta
             equipo = prestamo.reserva.equipo
-            equipo.stock += prestamo.reserva.cantidad
+            
+            # Si el equipo vuelve operativo, devolvemos las piezas al stock
             if estado_devuelto == 'operativo':
+                equipo.stock += prestamo.reserva.cantidad
+            
+            # Si vuelve dañado o faltante, las piezas NO vuelven al stock (se descuentan)
+            # (Opcional: podrías agregar lógica para enviar solo las dañadas a mantenimiento)
+            
+            # Si el stock es mayor a 0, sigue disponible para reservar
+            if equipo.stock > 0:
                 equipo.estado = 'disponible'
             else:
                 equipo.estado = 'mantenimiento'
+                
             equipo.save()
             
             return redirect('catalogo')
@@ -326,3 +334,14 @@ def dispositivos_prestados(request):
         'total_activos': prestamos_activos.count(),
     }
     return render(request, 'loans/dispositivos_prestados.html', context)
+
+@role_required('encargado', 'administrador')
+def registro_reportes(request):
+    # Traemos todos los reportes ordenados por fecha (el más reciente primero)
+    reportes = ReporteIncidente.objects.all().select_related(
+        'prestamo__reserva__usuario', 
+        'prestamo__reserva__equipo',
+        'encargado'
+    ).order_by('-fecha_reporte')
+    
+    return render(request, 'loans/registro_reportes.html', {'reportes': reportes})
