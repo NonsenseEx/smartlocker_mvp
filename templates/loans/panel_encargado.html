@@ -40,6 +40,7 @@
                         <th>#</th>
                         <th>Equipo</th>
                         <th>Código</th>
+                        <th>Cant.</th>
                         <th>Solicitante</th>
                         <th>Bloque Horario</th>
                         <th>Fecha Reserva</th>
@@ -52,14 +53,13 @@
                         <td>{{ reserva.id }}</td>
                         <td>{{ reserva.equipo.nombre }}</td>
                         <td><code>{{ reserva.equipo.codigo }}</code></td>
+                        <td><span class="badge bg-primary">{{ reserva.cantidad }}</span></td>
                         <td>{{ reserva.usuario.username }}</td>
                         <td>{{ reserva.bloque_horario }}</td>
                         <td>{{ reserva.fecha_creacion|date:"d M Y H:i" }}</td>
                         <td>
-                            <a href="{% url 'confirmar_entrega' reserva.id %}"
-                               class="btn btn-success btn-sm">
-                                Confirmar Entrega
-                            </a>
+                            <a href="{% url 'confirmar_entrega' reserva.id %}" class="btn btn-success btn-sm mb-1">Confirmar Entrega</a>
+                            <a href="{% url 'cancelar_reserva_encargado' reserva.id %}" class="btn btn-outline-danger btn-sm mb-1">Cancelar</a>
                         </td>
                     </tr>
                     {% endfor %}

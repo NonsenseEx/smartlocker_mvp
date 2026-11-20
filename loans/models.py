@@ -14,6 +14,7 @@ class Reserva(models.Model):
     bloque_horario = models.CharField(max_length=100, help_text="Ej: Lunes 10:00 - 12:00")
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     estado = models.CharField(max_length=20, choices=ESTADOS_RESERVA, default='pendiente')
+    cantidad = models.PositiveIntegerField(default=1)     
 
     def __str__(self):
         return f"Reserva {self.id} - {self.equipo.nombre} por {self.usuario.username}"
@@ -33,8 +34,27 @@ class Prestamo(models.Model):
     fecha_devolucion_real = models.DateTimeField(null=True, blank=True)
     estado_equipo_devuelto = models.CharField(max_length=20, choices=ESTADOS_DEVOLUCION, blank=True, null=True)
     
+    
     # Lógica de atraso (RF-07)
     tiene_retraso = models.BooleanField(default=False)
+    dias_retraso = models.PositiveIntegerField(default=0, help_text="Días de retraso al devolver")
 
     def __str__(self):
         return f"Préstamo {self.id} - {self.reserva.equipo.codigo}"
+
+class ReporteIncidente(models.Model):
+    TIPOS = (
+        ('atraso', 'Atraso en devolución'),
+        ('dano', 'Daño del equipo'),
+        ('robo', 'Pérdida / Robo'),
+        ('otro', 'Otro problema'),
+    )
+    prestamo = models.ForeignKey(Prestamo, on_delete=models.CASCADE, related_name='reportes')
+    encargado = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    tipo = models.CharField(max_length=20, choices=TIPOS)
+    descripcion = models.TextField()
+    fecha_reporte = models.DateTimeField(auto_now_add=True)
+    bloqueo_aplicado = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Reporte {self.get_tipo_display()} - Préstamo {self.prestamo.id}"

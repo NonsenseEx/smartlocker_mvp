@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6">
+        <div class="card shadow border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">Reportar Incidente</h4>
+            </div>
+            <div class="card-body">
+                <p><strong>Equipo:</strong> {{ prestamo.reserva.equipo.nombre }}</p>
+                <p><strong>Usuario:</strong> {{ prestamo.reserva.usuario.username }}</p>
+                <hr>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de Incidente:</label>
+                        <select name="tipo" class="form-select" required>
+                            <option value="atraso">Atraso en devolución</option>
+                            <option value="dano">Daño del equipo</option>
+                            <option value="robo">Pérdida / Robo</option>
+                            <option value="otro">Otro problema</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Detalles:</label>
+                        <textarea name="descripcion" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" name="aplicar_bloqueo" id="bloqueo">
+                        <label class="form-check-label text-danger fw-bold" for="bloqueo">
+                            Aplicar bloqueo de 30 días al usuario
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-danger w-100">Enviar Reporte</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

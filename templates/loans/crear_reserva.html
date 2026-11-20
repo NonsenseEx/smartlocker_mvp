@@ -23,7 +23,12 @@
                             <option value="Martes 14:00 - 16:00">Martes 14:00 - 16:00</option>
                         </select>
                     </div>
-                    
+                    <div class="mb-3">
+                        <label class="form-label">Cantidad a reservar (Máx: {{ equipo.stock }}):</label>
+                        <input type="number" name="cantidad" class="form-control" value="1" min="1" max="{{ equipo.stock }}" required>
+                    </div>
+
+                    <!-- Botón de confirmar -->
                     <button type="submit" class="btn btn-success w-100">Confirmar Reserva</button>
                     <a href="{% url 'catalogo' %}" class="btn btn-secondary w-100 mt-2">Cancelar</a>
                 </form>

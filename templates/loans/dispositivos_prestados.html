@@ -58,9 +58,9 @@
                                 <th>Equipo</th>
                                 <th>Cantidad</th>
                                 <th>Solicitante</th>
-                                <th>Fecha Salida</th>
                                 <th>Fecha Límite</th>
                                 <th>Estado</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -72,10 +72,9 @@
                                     <br><small class="text-muted">{{ p.reserva.equipo.codigo }}</small>
                                 </td>
                                 <td>
-                                    <span class="badge bg-info">1</span>
+                                    <span class="badge bg-info">{{ p.reserva.cantidad }}</span>
                                 </td>
                                 <td>{{ p.reserva.usuario.username }}</td>
-                                <td>{{ p.fecha_salida|date:"d M Y H:i" }}</td>
                                 <td>{{ p.fecha_limite|date:"d M Y H:i" }}</td>
                                 <td>
                                     {% if p.esta_vencido %}
@@ -83,6 +82,11 @@
                                     {% else %}
                                     <span class="badge bg-success">En plazo</span>
                                     {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'reportar_incidente' p.id %}" class="btn btn-warning btn-sm text-dark fw-bold">
+                                        🚩 Reportar
+                                    </a>
                                 </td>
                             </tr>
                             {% endfor %}

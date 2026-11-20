@@ -1,8 +1,7 @@
-from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
 class Usuario(AbstractUser):
-    # Definimos los roles que pediste en la Parte 1 (RF-01)
     ROLES = (
         ('solicitante', 'Solicitante (Estudiante / Docente)'),
         ('encargado', 'Encargado del Centro de Préstamos'),
@@ -10,8 +9,10 @@ class Usuario(AbstractUser):
     )
     rol = models.CharField(max_length=20, choices=ROLES, default='solicitante')
     
-    # Para la sanción lógica (RF-04)
     tiene_sancion_activa = models.BooleanField(default=False)
+    
+    # --- NUEVO CAMPO ---
+    fecha_fin_sancion = models.DateTimeField(null=True, blank=True, help_text="Fecha hasta la que el usuario está suspendido")
 
     def __str__(self):
         return f"{self.username} - {self.get_rol_display()}"
