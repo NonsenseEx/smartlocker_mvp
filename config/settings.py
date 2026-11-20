@@ -132,3 +132,11 @@ MAILERS = {
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'catalogo' 
+
+# Configuración de correo para desarrollo (imprime los correos en la consola)
+MAILERS = {
+    "default": {
+        "BACKEND": "django.core.mail.backends.console.EmailBackend",
+    },
+}
+DEFAULT_FROM_EMAIL = 'no-reply@smartlocker.cl'

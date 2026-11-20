@@ -1,15 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from inventory.models import Equipo
-from .models import Reserva
 from django.utils import timezone
-from datetime import timedelta
-from .models import Reserva, Prestamo
-from users.decorators import role_required
 from django.db.models import Count
 
-
+from inventory.models import Equipo
+from users.decorators import role_required
+from .models import Reserva, Prestamo
+from .utils import enviar_correo_notificacion
 
 @login_required
 def crear_reserva(request, equipo_id):
@@ -36,6 +34,15 @@ def crear_reserva(request, equipo_id):
                 bloque_horario=bloque_horario,
                 estado='confirmada'
             )
+            
+            #  Enviar correo de notificación ---
+            enviar_correo_notificacion(
+                asunto="SmartLocker - Reserva Confirmada",
+                mensaje=f"Hola {request.user.username},\n\nTu reserva para el equipo {equipo.nombre} (Código: {equipo.codigo}) ha sido confirmada.\n\nAcércate al pañol en el bloque: {bloque_horario} para retirar tu equipo.\n\nSaludos,\nEl equipo de SmartLocker.",
+                destinatario=request.user.email
+            )
+            # ---------------------------------------------
+
             messages.success(
                 request,
                 f"¡Reserva confirmada! Comprobante N° {reserva.id} para "
@@ -46,8 +53,8 @@ def crear_reserva(request, equipo_id):
         else:
             messages.error(request, "Debes seleccionar un bloque horario.")
             
-    # ESTA ES LA LÍNEA QUE TE FALTA:
     return render(request, 'loans/crear_reserva.html', {'equipo': equipo})
+
 
 @login_required
 def registrar_devolucion(request, prestamo_id):
@@ -87,6 +94,7 @@ def registrar_devolucion(request, prestamo_id):
             
     return render(request, 'loans/registrar_devolucion.html', {'prestamo': prestamo})
 
+
 # 1. Vista para que el usuario vea sus préstamos activos
 @login_required
 def mis_prestamos(request):
@@ -97,6 +105,7 @@ def mis_prestamos(request):
         fecha_devolucion_real__isnull=True
     )
     return render(request, 'loans/mis_prestamos.html', {'prestamos': prestamos_activos})
+
 
 # 2. Vista para que el propio usuario procese la devolución
 @login_required
@@ -131,7 +140,6 @@ def devolver_mi_equipo(request, prestamo_id):
             return redirect('catalogo')
             
     return render(request, 'loans/devolver_mi_equipo.html', {'prestamo': prestamo})
-
 
 
 @role_required('encargado', 'administrador')
@@ -183,6 +191,14 @@ def confirmar_entrega(request, reserva_id):
         equipo = reserva.equipo
         equipo.estado = 'prestado'
         equipo.save()
+
+        # Notificar al alumno que se le entregó el equipo ---
+        enviar_correo_notificacion(
+            asunto="SmartLocker - Equipo Entregado",
+            mensaje=f"Hola {reserva.usuario.username},\n\nSe te ha entregado el equipo {equipo.nombre}.\n\nTienes plazo hasta mañana a la misma hora para devolverlo.\n\nSaludos.",
+            destinatario=reserva.usuario.email
+        )
+        # -------------------------------------------------------------
 
         messages.success(
             request,
