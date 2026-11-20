@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>📦 Dispositivos Prestados</h2>
+    <a href="{% url 'panel_encargado' %}" class="btn btn-outline-secondary">
+        ← Volver al Panel
+    </a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card border-primary shadow-sm">
+            <div class="card-body text-center">
+                <h5 class="text-muted">Préstamos Activos</h5>
+                <h2 class="display-4">{{ total_activos }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Resumen por equipo -->
+    <div class="col-md-4">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Resumen por Equipo</h5>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for r in resumen_por_equipo %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                        {{ r.reserva__equipo__nombre }}
+                        <br><small class="text-muted">{{ r.reserva__equipo__codigo }}</small>
+                    </span>
+                    <span class="badge bg-primary rounded-pill">{{ r.cantidad }}</span>
+                </li>
+                {% empty %}
+                <li class="list-group-item text-muted">Sin préstamos activos.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Tabla detallada -->
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">Detalle de Préstamos Activos</h5>
+            </div>
+            <div class="card-body">
+                {% if prestamos_activos %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Equipo</th>
+                                <th>Cantidad</th>
+                                <th>Solicitante</th>
+                                <th>Fecha Salida</th>
+                                <th>Fecha Límite</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in prestamos_activos %}
+                            <tr class="{% if p.esta_vencido %}table-danger{% endif %}">
+                                <td>{{ p.id }}</td>
+                                <td>
+                                    {{ p.reserva.equipo.nombre }}
+                                    <br><small class="text-muted">{{ p.reserva.equipo.codigo }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">1</span>
+                                </td>
+                                <td>{{ p.reserva.usuario.username }}</td>
+                                <td>{{ p.fecha_salida|date:"d M Y H:i" }}</td>
+                                <td>{{ p.fecha_limite|date:"d M Y H:i" }}</td>
+                                <td>
+                                    {% if p.esta_vencido %}
+                                    <span class="badge bg-danger">⚠️ Vencido</span>
+                                    {% else %}
+                                    <span class="badge bg-success">En plazo</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info mb-0">
+                    No hay dispositivos prestados en este momento.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

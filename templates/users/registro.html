@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">Crear una Cuenta en SmartLocker</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label class="form-label">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <div class="form-text text-muted" style="font-size: 0.8rem;">{{ field.help_text|safe }}</div>
+                            {% endif %}
+                            {% if field.errors %}
+                                <div class="text-danger">{{ field.errors }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-success w-100">Registrarme</button>
+                </form>
+                <div class="text-center mt-3">
+                    <a href="{% url 'login' %}">¿Ya tienes cuenta? Inicia sesión aquí</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

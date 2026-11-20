@@ -12,4 +12,5 @@ urlpatterns = [
     # Rutas de la app inventory (Catálogo)
     path('', include('inventory.urls')),
     path('prestamos/', include('loans.urls')), 
+    path('usuarios/', include('users.urls')), # Rutas de la app users
 ]

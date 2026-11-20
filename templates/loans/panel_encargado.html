@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>🔧 Panel del Encargado</h2>
+    <a href="{% url 'dispositivos_prestados' %}" class="btn btn-outline-primary">
+        Ver Dispositivos Prestados ({{ total_prestamos_activos }})
+    </a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card border-warning shadow-sm">
+            <div class="card-body text-center">
+                <h5 class="text-muted">Reservas Pendientes de Entrega</h5>
+                <h2 class="display-4">{{ reservas_pendientes|length }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-info shadow-sm">
+            <div class="card-body text-center">
+                <h5 class="text-muted">Préstamos Activos</h5>
+                <h2 class="display-4">{{ total_prestamos_activos }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">Reservas Pendientes de Despacho</h5>
+    </div>
+    <div class="card-body">
+        {% if reservas_pendientes %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Equipo</th>
+                        <th>Código</th>
+                        <th>Solicitante</th>
+                        <th>Bloque Horario</th>
+                        <th>Fecha Reserva</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reserva in reservas_pendientes %}
+                    <tr>
+                        <td>{{ reserva.id }}</td>
+                        <td>{{ reserva.equipo.nombre }}</td>
+                        <td><code>{{ reserva.equipo.codigo }}</code></td>
+                        <td>{{ reserva.usuario.username }}</td>
+                        <td>{{ reserva.bloque_horario }}</td>
+                        <td>{{ reserva.fecha_creacion|date:"d M Y H:i" }}</td>
+                        <td>
+                            <a href="{% url 'confirmar_entrega' reserva.id %}"
+                               class="btn btn-success btn-sm">
+                                Confirmar Entrega
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info mb-0">
+            No hay reservas pendientes de despacho en este momento.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

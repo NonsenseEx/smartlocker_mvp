@@ -6,51 +6,47 @@ from .models import Reserva
 from django.utils import timezone
 from datetime import timedelta
 from .models import Reserva, Prestamo
+from users.decorators import role_required
+from django.db.models import Count
+
 
 
 @login_required
 def crear_reserva(request, equipo_id):
     equipo = get_object_or_404(Equipo, id=equipo_id)
     
+    # 1. REGLA DE NEGOCIO: Validar si el usuario tiene sanción (RF-04)
     if request.user.tiene_sancion_activa:
         messages.error(request, "Usuario Suspendido: No puedes realizar reservas porque tienes una sanción activa.")
         return redirect('catalogo')
         
-    #  Equipo está disponible ?
+    # 2. Validar que el equipo esté disponible
     if equipo.estado != 'disponible':
         messages.warning(request, "El equipo no está disponible actualmente.")
         return redirect('catalogo')
 
     if request.method == 'POST':
-        # Obtenemos el bloque horario del formulario
         bloque_horario = request.POST.get('bloque_horario')
         
         if bloque_horario:
-            # Creamos la reserva en la base de datos
+            # Creamos la reserva
             reserva = Reserva.objects.create(
                 usuario=request.user,
                 equipo=equipo,
                 bloque_horario=bloque_horario,
                 estado='confirmada'
             )
-            
-            # 1. Cambiamos el estado del equipo a prestado para la demo
-            equipo.estado = 'prestado'
-            equipo.save()
-            
-            # 2. Creamos el préstamo automáticamente con fecha límite de 24 horas
-            Prestamo.objects.create(
-                reserva=reserva,
-                fecha_limite=timezone.now() + timezone.timedelta(days=1)
+            messages.success(
+                request,
+                f"¡Reserva confirmada! Comprobante N° {reserva.id} para "
+                f"{equipo.nombre} en el bloque: {bloque_horario}. "
+                f"Acércate al pañol para retirar el equipo."
             )
-        
-            
-            
-            messages.success(request, f"¡Reserva confirmada! Comprobante N° {reserva.id} para {equipo.nombre} en el bloque: {bloque_horario}")
             return redirect('catalogo')
         else:
             messages.error(request, "Debes seleccionar un bloque horario.")
             
+    # ESTA ES LA LÍNEA QUE TE FALTA:
     return render(request, 'loans/crear_reserva.html', {'equipo': equipo})
 
 @login_required
@@ -135,3 +131,100 @@ def devolver_mi_equipo(request, prestamo_id):
             return redirect('catalogo')
             
     return render(request, 'loans/devolver_mi_equipo.html', {'prestamo': prestamo})
+
+
+
+@role_required('encargado', 'administrador')
+def panel_encargado(request):
+    """
+    Vista principal del Encargado.
+    Muestra las reservas confirmadas que aún NO tienen un préstamo asociado
+    (es decir, equipos reservados pero pendientes de entrega física).
+    """
+    # Reservas confirmadas que no tienen préstamo creado todavía
+    reservas_pendientes = Reserva.objects.filter(
+        estado='confirmada',
+        prestamo__isnull=True
+    ).select_related('usuario', 'equipo').order_by('fecha_creacion')
+
+    # Contador rápido de préstamos activos (para mostrar en el panel)
+    total_prestamos_activos = Prestamo.objects.filter(
+        fecha_devolucion_real__isnull=True
+    ).count()
+
+    context = {
+        'reservas_pendientes': reservas_pendientes,
+        'total_prestamos_activos': total_prestamos_activos,
+    }
+    return render(request, 'loans/panel_encargado.html', context)
+
+
+@role_required('encargado', 'administrador')
+def confirmar_entrega(request, reserva_id):
+    """
+    El Encargado confirma la entrega física de un equipo reservado.
+    Crea el registro de Prestamo y cambia el estado del equipo a 'prestado'.
+    """
+    reserva = get_object_or_404(Reserva, id=reserva_id, estado='confirmada')
+
+    # Verificar que la reserva no tenga ya un préstamo (evita duplicados)
+    if hasattr(reserva, 'prestamo'):
+        messages.warning(request, "Esta reserva ya fue entregada anteriormente.")
+        return redirect('panel_encargado')
+
+    if request.method == 'POST':
+        # Crear el préstamo con fecha límite de 24 horas (ajustable)
+        Prestamo.objects.create(
+            reserva=reserva,
+            fecha_limite=timezone.now() + timezone.timedelta(days=1)
+        )
+
+        # Cambiar estado del equipo a prestado
+        equipo = reserva.equipo
+        equipo.estado = 'prestado'
+        equipo.save()
+
+        messages.success(
+            request,
+            f"Entrega confirmada: {equipo.nombre} (código {equipo.codigo}) "
+            f"entregado a {reserva.usuario.username}."
+        )
+        return redirect('panel_encargado')
+
+    # GET: mostrar pantalla de confirmación
+    return render(request, 'loans/confirmar_entrega.html', {'reserva': reserva})
+
+
+@role_required('encargado', 'administrador')
+def dispositivos_prestados(request):
+    """
+    Vista que muestra todos los préstamos activos (no devueltos aún),
+    agrupando la información: equipo, cantidad, usuario solicitante y fechas.
+    """
+    prestamos_activos = Prestamo.objects.filter(
+        fecha_devolucion_real__isnull=True
+    ).select_related(
+        'reserva__equipo',
+        'reserva__usuario',
+        'reserva__equipo__categoria'
+    ).order_by('fecha_limite')  # Los que vencen primero, arriba
+
+    # Resumen por equipo (cuántas unidades de cada equipo están prestadas)
+    resumen_por_equipo = (
+        Prestamo.objects.filter(fecha_devolucion_real__isnull=True)
+        .values('reserva__equipo__nombre', 'reserva__equipo__codigo')
+        .annotate(cantidad=Count('id'))
+        .order_by('-cantidad')
+    )
+
+    # Marcar visualmente los préstamos vencidos (para el template)
+    ahora = timezone.now()
+    for p in prestamos_activos:
+        p.esta_vencido = p.fecha_limite < ahora
+
+    context = {
+        'prestamos_activos': prestamos_activos,
+        'resumen_por_equipo': resumen_por_equipo,
+        'total_activos': prestamos_activos.count(),
+    }
+    return render(request, 'loans/dispositivos_prestados.html', context)
