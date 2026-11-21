@@ -2,10 +2,15 @@
 
 {% block content %}
 <div class="row justify-content-center mt-5">
-    <div class="col-md-4">
-        <div class="card shadow">
+    <div class="col-md-5 col-lg-4">
+        <div class="card shadow auth-card">
+            <div class="card-header text-center">
+                <span class="d-block fs-1 mb-1">🔐</span>
+                <h4 class="mb-0">Ingreso a SmartLocker</h4>
+                <small class="text-muted">Pañol universitario</small>
+            </div>
             <div class="card-body">
-                <h3 class="text-center mb-4">Ingreso a SmartLocker</h3>
+                <h3 class="text-center mb-4 h5">Bienvenido de nuevo</h3>
                 
                 <!-- Si el usuario se equivoca, mostramos error -->
                 {% if form.errors %}
