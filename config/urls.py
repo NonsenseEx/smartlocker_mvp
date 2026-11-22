@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.urls import path, include
-from django.contrib.auth import views as auth_views # Importamos las vistas de auth de Django
+from django.contrib.auth import views as auth_views 
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -14,3 +16,5 @@ urlpatterns = [
     path('prestamos/', include('loans.urls')), 
     path('usuarios/', include('users.urls')), # Rutas de la app users
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

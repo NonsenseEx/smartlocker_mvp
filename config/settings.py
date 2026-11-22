@@ -140,3 +140,6 @@ MAILERS = {
     },
 }
 DEFAULT_FROM_EMAIL = 'no-reply@smartlocker.cl'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

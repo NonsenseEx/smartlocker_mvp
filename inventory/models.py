@@ -18,6 +18,9 @@ class Equipo(models.Model):
     categoria = models.ForeignKey(Categoria, on_delete=models.PROTECT)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='disponible')
     stock = models.PositiveIntegerField(default=1, help_text="Cantidad total en el pañol")
+    imagen = models.ImageField(upload_to='equipos/', null=True, blank=True, help_text="Foto del equipo")
 
     def __str__(self):
         return f"{self.codigo} - {self.nombre} ({self.get_estado_display()})"
+
+    
