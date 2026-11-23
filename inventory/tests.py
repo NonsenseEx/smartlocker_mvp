@@ -254,3 +254,12 @@ class FlujoPrestamoTestCase(TestCase):
         )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Reserva.objects.count(), 0)
+
+
+class HealthEndpointTests(TestCase):
+    def test_health_responde_sin_autenticacion(self):
+        for path in ("/health", "/health/"):
+            with self.subTest(path=path):
+                response = self.client.get(path)
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.json(), {"status": "ok"})

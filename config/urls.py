@@ -4,7 +4,11 @@ from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 
+from .views import health
+
 urlpatterns = [
+    path('health', health, name='health'),
+    path('health/', health, name='health_trailing_slash'),
     path('admin/', admin.site.urls),
     
     # Rutas de Autenticación (Django las trae hechas)

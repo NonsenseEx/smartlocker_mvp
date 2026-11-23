@@ -37,6 +37,8 @@ Las imágenes de prueba del catálogo se descargaron de Wikimedia Commons y se o
 
 Sigue estos pasos para replicar el entorno de desarrollo en tu computadora:
 
+> El servidor expone `GET /health` (y `/health/`) con `{"status": "ok"}` para responder sondas de disponibilidad.
+
 1. **Clonar el repositorio:**
    ```bash
    git clone https://github.com/NonsenseEx/smartlocker_mvp
