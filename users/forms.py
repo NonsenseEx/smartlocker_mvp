@@ -24,12 +24,20 @@ class EditarPerfilForm(UserChangeForm):
     
     class Meta:
         model = Usuario
-        fields = ('first_name', 'last_name', 'email')
+        fields = ('first_name', 'last_name', 'email', 'foto_perfil')
         widgets = {
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'foto_perfil': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
         }
+
+    def clean_foto_perfil(self):
+        foto = self.cleaned_data.get('foto_perfil')
+        if foto and foto.size > 2 * 1024 * 1024:
+            raise forms.ValidationError('La imagen no debe superar los 2 MB.')
+        return foto
+
 
 class AdminEditarUsuarioForm(forms.ModelForm):
     class Meta:

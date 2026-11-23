@@ -1,41 +1,70 @@
 {% extends 'base.html' %}
+
+{% block title %}Editar usuario — SmartLocker{% endblock %}
+{% block topbar_context %}Administración{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center mt-4">
-    <div class="col-md-6">
-        <div class="card shadow">
-            <div class="card-header bg-dark text-white">
-                <h4 class="mb-0">Editando a: {{ usuario_editado.username }}</h4>
-            </div>
+<div class="sl-page-header">
+    <div>
+        <span class="sl-eyebrow">Administración</span>
+        <h1 class="sl-page-title">Editar usuario</h1>
+        <p class="sl-page-subtitle">Gestiona roles, datos y estado de cuenta de {{ usuario_editado.username }}.</p>
+    </div>
+    <div class="sl-page-actions">
+        <a href="{% url 'gestion_usuarios' %}" class="btn btn-ghost">
+            <svg class="sl-icon"><use href="#i-arrow-left"></use></svg>Volver
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+        <div class="card">
             <div class="card-body">
-                <form method="post">
+                <div class="sl-form-heading">
+                    <span class="sl-icon-tile"><svg class="sl-icon"><use href="#i-users"></use></svg></span>
+                    <div>
+                        <h2>{{ usuario_editado.username }}</h2>
+                        <p>Modificando cuenta de usuario</p>
+                    </div>
+                </div>
+
+                <form method="post" class="sl-stack-sm">
                     {% csrf_token %}
-                    
                     {% for field in form %}
-                        {% if field.name == 'tiene_sancion_activa' %}
-                            <div class="mb-3 form-check form-switch">
-                                {{ field }}
-                                <label class="form-check-label text-danger fw-bold">{{ field.label }} (Suspender cuenta)</label>
-                            </div>
-                        {% else %}
-                            <div class="mb-3">
-                                <label class="form-label">{{ field.label }}</label>
-                                {{ field }}
-                                {% if field.help_text %}
-                                    <div class="form-text text-muted">{{ field.help_text }}</div>
-                                {% endif %}
-                                {% if field.errors %}
-                                    <div class="text-danger">{{ field.errors }}</div>
-                                {% endif %}
-                            </div>
+                    {% if field.name == 'tiene_sancion_activa' %}
+                    <div class="sl-check-card">
+                        {{ field }}
+                        <div>
+                            <strong>{{ field.label }} · Suspender cuenta</strong>
+                            <small>El usuario no podrá reservar equipos mientras la sanción esté activa.</small>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div>
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                        <div class="form-text">{{ field.help_text }}</div>
                         {% endif %}
+                        {% if field.errors %}
+                        <div class="sl-field-error">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
                     {% endfor %}
 
-                    <div class="alert alert-info">
-                        <small><strong>Nota:</strong> Si activas la casilla de suspensión, asegúrate de poner una fecha de fin para que el sistema levante el castigo automáticamente.</small>
+                    <div class="sl-alert sl-alert--info">
+                        <svg class="sl-icon sl-icon--sm"><use href="#i-info"></use></svg>
+                        <span><strong>Nota:</strong> si activas la suspensión, define una fecha de fin para que el sistema levante la sanción automáticamente.</span>
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-100">Guardar Cambios</button>
-                    <a href="{% url 'gestion_usuarios' %}" class="btn btn-secondary w-100 mt-2">Cancelar</a>
+                    <div class="sl-form-actions">
+                        <a href="{% url 'gestion_usuarios' %}" class="btn btn-outline-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">
+                            <svg class="sl-icon"><use href="#i-check"></use></svg>Guardar cambios
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

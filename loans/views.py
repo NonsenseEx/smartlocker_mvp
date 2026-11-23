@@ -2,12 +2,16 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
-from django.db.models import Count, Sum
-from django.db import models
-from django.conf import settings
+from django.db.models import Count
 
 from inventory.models import Equipo
 from users.decorators import role_required
+from .calendar_utils import (
+    bloques_del_dia,
+    calendario_reservas,
+    cupo_disponible,
+    validar_fecha_reserva,
+)
 from .models import Reserva, Prestamo, ReporteIncidente
 from .utils import enviar_correo_notificacion
 
@@ -33,52 +37,68 @@ def crear_reserva(request, equipo_id):
 
     if request.method == 'POST':
         bloque_horario = request.POST.get('bloque_horario')
-        cantidad_str = request.POST.get('cantidad', '1')
-        
+        fecha, error = validar_fecha_reserva(equipo, request.POST.get('fecha_reserva'))
+
+        if error:
+            messages.error(request, error)
+            return redirect('crear_reserva', equipo_id=equipo.id)
+
         try:
-            cantidad_solicitada = int(cantidad_str)
+            cantidad_solicitada = int(request.POST.get('cantidad', '1'))
         except ValueError:
             cantidad_solicitada = 1
 
-        if bloque_horario:
-            # 3. VALIDACIÓN DE STOCK POR BLOQUE HORARIO
-            reservas_existentes = Reserva.objects.filter(
-                equipo=equipo,
-                bloque_horario=bloque_horario,
-                estado='confirmada'
-            ).aggregate(total=models.Sum('cantidad'))['total'] or 0
-            
-            stock_disponible = equipo.stock - reservas_existentes
-            
-            if cantidad_solicitada > stock_disponible:
-                messages.error(request, f"No hay suficiente stock en este bloque. Solo quedan {stock_disponible} unidades de {equipo.nombre}.")
-                return redirect('crear_reserva', equipo_id=equipo.id)
-            
-            # Creamos la reserva
-            reserva = Reserva.objects.create(
-                usuario=request.user,
-                equipo=equipo,
-                bloque_horario=bloque_horario,
-                cantidad=cantidad_solicitada,
-                estado='confirmada'
-            )
-            
-            # Enviar correo de notificación
-            enviar_correo_notificacion(
-                asunto="SmartLocker - Reserva Confirmada",
-                mensaje=f"Hola {request.user.username},\n\nTu reserva para {cantidad_solicitada} unidad(es) de {equipo.nombre} ha sido confirmada para el bloque: {bloque_horario}.\n\nSaludos,\nEl equipo de SmartLocker.",
-                destinatario=request.user.email
-            )
-            
-            messages.success(
+        if bloque_horario not in bloques_del_dia(fecha):
+            messages.error(request, "Selecciona un horario válido para el día elegido.")
+            return redirect('crear_reserva', equipo_id=equipo.id)
+
+        if cantidad_solicitada < 1:
+            messages.error(request, "La cantidad debe ser al menos 1.")
+            return redirect('crear_reserva', equipo_id=equipo.id)
+
+        # 3. VALIDACIÓN DE STOCK POR FECHA Y BLOQUE HORARIO
+        stock_disponible = cupo_disponible(equipo, fecha, bloque_horario)
+
+        if cantidad_solicitada > stock_disponible:
+            messages.error(
                 request,
-                f"¡Reserva confirmada! Comprobante N° {reserva.id} para {cantidad_solicitada} {equipo.nombre}(s) en el bloque: {bloque_horario}."
+                f"No hay suficiente stock para el {fecha.strftime('%d/%m/%Y')} en el bloque "
+                f"{bloque_horario}. Solo quedan {stock_disponible} unidad(es) de {equipo.nombre}."
             )
-            return redirect('catalogo')
-        else:
-            messages.error(request, "Debes seleccionar un bloque horario.")
-            
-    return render(request, 'loans/crear_reserva.html', {'equipo': equipo})
+            return redirect('crear_reserva', equipo_id=equipo.id)
+
+        reserva = Reserva.objects.create(
+            usuario=request.user,
+            equipo=equipo,
+            fecha_reserva=fecha,
+            bloque_horario=bloque_horario,
+            cantidad=cantidad_solicitada,
+            estado='confirmada'
+        )
+
+        fecha_texto = fecha.strftime('%d/%m/%Y')
+        enviar_correo_notificacion(
+            asunto="SmartLocker - Reserva Confirmada",
+            mensaje=(
+                f"Hola {request.user.username},\n\nTu reserva para {cantidad_solicitada} "
+                f"unidad(es) de {equipo.nombre} ha sido confirmada para el {fecha_texto} "
+                f"en el bloque: {bloque_horario}.\n\nSaludos,\nEl equipo de SmartLocker."
+            ),
+            destinatario=request.user.email
+        )
+
+        messages.success(
+            request,
+            f"¡Reserva confirmada! Comprobante N° {reserva.id}: {cantidad_solicitada} x "
+            f"{equipo.nombre} el {fecha_texto} a las {bloque_horario.split(' ', 1)[1]}."
+        )
+        return redirect('catalogo')
+
+    calendario = calendario_reservas(equipo)
+    return render(request, 'loans/crear_reserva.html', {
+        'equipo': equipo,
+        'calendario': calendario,
+    })
 
 
 @login_required

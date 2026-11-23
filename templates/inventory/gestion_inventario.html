@@ -1,45 +1,148 @@
 {% extends 'base.html' %}
+
+{% block title %}Gestión de inventario — SmartLocker{% endblock %}
+{% block topbar_context %}Inventario{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>📋 Gestión de Inventario</h2>
-    {% if user.rol == 'administrador' %}
+<div class="sl-page-header">
     <div>
-        <a href="{% url 'equipos_defectuosos' %}" class="btn btn-warning me-2">🛠️ Ver Defectuosos</a>
+        <span class="sl-eyebrow">Operaciones</span>
+        <h1 class="sl-page-title">Gestión de inventario</h1>
+        <p class="sl-page-subtitle">Controla stock, fechas de disponibilidad y estados del pañol universitario.</p>
+    </div>
+    <div class="sl-page-actions">
+        <a href="{% url 'equipos_defectuosos' %}" class="btn btn-outline-secondary">
+            <svg class="sl-icon"><use href="#i-wrench"></use></svg>Ver defectuosos
+        </a>
         {% if user.rol == 'administrador' %}
-            <a href="{% url 'crear_equipo' %}" class="btn btn-success">➕ Agregar Nuevo Equipo</a>
+        <a href="{% url 'crear_equipo' %}" class="btn btn-primary">
+            <svg class="sl-icon"><use href="#i-plus"></use></svg>Agregar equipo
+        </a>
         {% endif %}
     </div>
-    {% endif %}
 </div>
 
-<div class="card shadow">
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3">
+        <div class="sl-metric">
+            <div class="sl-metric-top">
+                <span class="sl-metric-label">Total de equipos</span>
+                <span class="sl-metric-icon"><svg class="sl-icon"><use href="#i-grid"></use></svg></span>
+            </div>
+            <div class="sl-metric-value">{{ resumen.total_equipos }}</div>
+            <p class="sl-metric-hint">Registrados en el catálogo</p>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="sl-metric sl-metric--success">
+            <div class="sl-metric-top">
+                <span class="sl-metric-label">Stock total</span>
+                <span class="sl-metric-icon"><svg class="sl-icon"><use href="#i-box"></use></svg></span>
+            </div>
+            <div class="sl-metric-value">{{ resumen.stock_total }}</div>
+            <p class="sl-metric-hint">Unidades disponibles en el pañol</p>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="sl-metric sl-metric--success">
+            <div class="sl-metric-top">
+                <span class="sl-metric-label">Equipos activos</span>
+                <span class="sl-metric-icon"><svg class="sl-icon"><use href="#i-check"></use></svg></span>
+            </div>
+            <div class="sl-metric-value">{{ resumen.equipos_disponibles }}</div>
+            <p class="sl-metric-hint">En estado disponible</p>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="sl-metric sl-metric--warning">
+            <div class="sl-metric-top">
+                <span class="sl-metric-label">En mantenimiento</span>
+                <span class="sl-metric-icon"><svg class="sl-icon"><use href="#i-wrench"></use></svg></span>
+            </div>
+            <div class="sl-metric-value">{{ resumen.equipos_mantenimiento }}</div>
+            <p class="sl-metric-hint">Requieren revisión</p>
+        </div>
+    </div>
+</div>
+
+<div class="card sl-table-card">
+    <div class="card-header sl-card-header">
+        <div>
+            <h2>Inventario completo</h2>
+            <p>Fechas de disponibilidad, stock y bloques horarios libres por equipo.</p>
+        </div>
+        <span class="sl-badge sl-badge--neutral"><svg class="sl-icon sl-icon--sm"><use href="#i-box"></use></svg>{{ equipos|length }} equipos</span>
+    </div>
     <div class="card-body">
+        {% if equipos %}
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-dark">
+            <table class="table sl-table sl-table--inventory">
+                <thead>
                     <tr>
                         <th>Código</th>
-                        <th>Nombre</th>
+                        <th>Equipo</th>
                         <th>Categoría</th>
+                        <th>Disponibilidad</th>
                         <th>Stock</th>
                         <th>Estado</th>
-                        {% if user.rol == 'administrador' %}
-                        <th>Acciones</th>
-                        {% endif %}
+                        {% if user.rol == 'administrador' %}<th class="text-end">Acciones</th>{% endif %}
                     </tr>
                 </thead>
                 <tbody>
                     {% for equipo in equipos %}
                     <tr>
                         <td><code>{{ equipo.codigo }}</code></td>
-                        <td>{{ equipo.nombre }}</td>
-                        <td>{{ equipo.categoria.nombre }}</td>
-                        <td><span class="badge {% if equipo.stock > 0 %}bg-success{% else %}bg-danger{% endif %}">{{ equipo.stock }}</span></td>
-                        <td>{{ equipo.get_estado_display }}</td>
-                        {% if user.rol == 'administrador' %}
+                        <td><strong>{{ equipo.nombre }}</strong></td>
+                        <td class="sl-muted">{{ equipo.categoria.nombre }}</td>
                         <td>
-                            <a href="{% url 'editar_equipo' equipo.id %}" class="btn btn-primary btn-sm">✏️ Editar</a>
-                            <a href="{% url 'eliminar_equipo' equipo.id %}" class="btn btn-danger btn-sm">🗑️ Borrar</a>
+                            {% if equipo.disponibilidad %}
+                            <div class="sl-availability">
+                                <div class="sl-availability-range">
+                                    <svg class="sl-icon sl-icon--sm"><use href="#i-clock"></use></svg>
+                                    {{ equipo.disponibilidad.rango }}
+                                </div>
+                                <div class="sl-availability-meta">
+                                    {{ equipo.disponibilidad.bloques_libres }}/{{ equipo.disponibilidad.total_bloques }} bloques libres
+                                </div>
+                                <details class="sl-blocks-details">
+                                    <summary>Ver bloques</summary>
+                                    <div class="sl-blocks-list">
+                                        {% for bloque in equipo.disponibilidad.bloques %}
+                                        <span class="sl-block-badge {% if not bloque.disponible %}is-full{% endif %}">
+                                            {{ bloque.label }} · {{ bloque.libres }}
+                                        </span>
+                                        {% endfor %}
+                                    </div>
+                                </details>
+                            </div>
+                            {% else %}
+                            <span class="sl-muted">Sin información</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="sl-badge {% if equipo.stock > 0 %}sl-badge--success{% else %}sl-badge--danger{% endif %}">
+                                {{ equipo.stock }} total
+                            </span>
+                        </td>
+                        <td>
+                            {% if equipo.estado == 'disponible' %}
+                            <span class="sl-badge sl-badge--success">Disponible</span>
+                            {% elif equipo.estado == 'prestado' %}
+                            <span class="sl-badge sl-badge--warning">Prestado</span>
+                            {% else %}
+                            <span class="sl-badge sl-badge--danger">Mantenimiento</span>
+                            {% endif %}
+                        </td>
+                        {% if user.rol == 'administrador' %}
+                        <td class="text-end">
+                            <div class="table-actions justify-content-end">
+                                <a href="{% url 'editar_equipo' equipo.id %}" class="btn btn-sm btn-outline-primary">
+                                    <svg class="sl-icon sl-icon--sm"><use href="#i-edit"></use></svg>Editar
+                                </a>
+                                <a href="{% url 'eliminar_equipo' equipo.id %}" class="btn btn-sm btn-outline-danger">
+                                    <svg class="sl-icon sl-icon--sm"><use href="#i-trash"></use></svg>Borrar
+                                </a>
+                            </div>
                         </td>
                         {% endif %}
                     </tr>
@@ -47,6 +150,16 @@
                 </tbody>
             </table>
         </div>
+        {% else %}
+        <div class="sl-empty">
+            <span class="sl-empty-icon"><svg class="sl-icon"><use href="#i-box"></use></svg></span>
+            <h3>Inventario vacío</h3>
+            <p>Agrega el primer equipo para comenzar a gestionar el pañol.</p>
+            {% if user.rol == 'administrador' %}
+            <a href="{% url 'crear_equipo' %}" class="btn btn-primary">Agregar equipo</a>
+            {% endif %}
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

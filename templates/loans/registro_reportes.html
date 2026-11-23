@@ -1,52 +1,69 @@
 {% extends 'base.html' %}
+
+{% block title %}Registro de reportes — SmartLocker{% endblock %}
+{% block topbar_context %}Reportes{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>📋 Registro de Reportes e Incidentes</h2>
-    <a href="{% url 'panel_encargado' %}" class="btn btn-outline-secondary">← Volver al Panel</a>
+<div class="sl-page-header">
+    <div>
+        <span class="sl-eyebrow">Operaciones</span>
+        <h1 class="sl-page-title">Registro de incidentes</h1>
+        <p class="sl-page-subtitle">Historial de reportes y sanciones aplicadas en el pañol.</p>
+    </div>
+    <div class="sl-page-actions">
+        <a href="{% url 'panel_encargado' %}" class="btn btn-ghost">
+            <svg class="sl-icon"><use href="#i-arrow-left"></use></svg>Volver al panel
+        </a>
+    </div>
 </div>
 
-<div class="card shadow">
+<div class="card sl-table-card">
+    <div class="card-header sl-card-header">
+        <div>
+            <h2>Historial de reportes</h2>
+            <p>{{ reportes|length }} registro(s) en el sistema</p>
+        </div>
+        <span class="sl-badge sl-badge--danger"><svg class="sl-icon sl-icon--sm"><use href="#i-file"></use></svg>Incidentes</span>
+    </div>
     <div class="card-body">
         {% if reportes %}
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-dark">
+            <table class="table sl-table">
+                <thead>
                     <tr>
                         <th>Fecha</th>
-                        <th>Usuario Afectado</th>
+                        <th>Usuario afectado</th>
                         <th>Equipo</th>
-                        <th>Tipo de Incidente</th>
+                        <th>Tipo</th>
                         <th>Detalle</th>
                         <th>Reportado por</th>
-                        <th>¿Bloqueado?</th>
+                        <th>Bloqueado</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for reporte in reportes %}
                     <tr>
-                        <td>{{ reporte.fecha_reporte|date:"d M Y H:i" }}</td>
-                        <td>
-                            <strong>{{ reporte.prestamo.reserva.usuario.username }}</strong>
-                        </td>
+                        <td class="sl-nowrap">{{ reporte.fecha_reporte|date:"d M Y H:i" }}</td>
+                        <td><strong>{{ reporte.prestamo.reserva.usuario.username }}</strong></td>
                         <td>{{ reporte.prestamo.reserva.equipo.nombre }}</td>
                         <td>
                             {% if reporte.tipo == 'robo' %}
-                                <span class="badge bg-danger">Robo / Pérdida</span>
+                            <span class="sl-badge sl-badge--danger">Robo / Pérdida</span>
                             {% elif reporte.tipo == 'dano' %}
-                                <span class="badge bg-warning text-dark">Daño</span>
+                            <span class="sl-badge sl-badge--warning">Daño</span>
                             {% elif reporte.tipo == 'atraso' %}
-                                <span class="badge bg-info text-dark">Atraso</span>
+                            <span class="sl-badge sl-badge--info">Atraso</span>
                             {% else %}
-                                <span class="badge bg-secondary">Otro</span>
+                            <span class="sl-badge sl-badge--neutral">Otro</span>
                             {% endif %}
                         </td>
                         <td><small>{{ reporte.descripcion }}</small></td>
                         <td>{{ reporte.encargado.username|default:"Sistema" }}</td>
                         <td>
                             {% if reporte.bloqueo_aplicado %}
-                                <span class="badge bg-danger">Sí</span>
+                            <span class="sl-badge sl-badge--danger">Sí</span>
                             {% else %}
-                                <span class="badge bg-success">No</span>
+                            <span class="sl-badge sl-badge--success">No</span>
                             {% endif %}
                         </td>
                     </tr>
@@ -55,8 +72,10 @@
             </table>
         </div>
         {% else %}
-        <div class="alert alert-info mb-0">
-            No hay reportes de incidentes registrados en el sistema.
+        <div class="sl-empty">
+            <span class="sl-empty-icon"><svg class="sl-icon"><use href="#i-file"></use></svg></span>
+            <h3>Sin incidentes registrados</h3>
+            <p>No hay reportes de incidentes en el sistema.</p>
         </div>
         {% endif %}
     </div>

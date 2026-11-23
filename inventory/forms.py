@@ -4,7 +4,7 @@ from .models import Equipo, Categoria
 class EquipoForm(forms.ModelForm):
     class Meta:
         model = Equipo
-        fields = ['nombre', 'codigo', 'categoria', 'estado', 'stock','imagen']
+        fields = ['nombre', 'codigo', 'categoria', 'estado', 'stock', 'imagen', 'disponible_desde', 'disponible_hasta']
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control'}),
             'codigo': forms.TextInput(attrs={'class': 'form-control'}),
@@ -12,4 +12,6 @@ class EquipoForm(forms.ModelForm):
             'estado': forms.Select(attrs={'class': 'form-select'}),
             'stock': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
             'imagen': forms.FileInput(attrs={'class': 'form-control'}),
+            'disponible_desde': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'disponible_hasta': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
         }

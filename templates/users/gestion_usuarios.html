@@ -1,21 +1,41 @@
 {% extends 'base.html' %}
+
+{% block title %}Gestión de usuarios — SmartLocker{% endblock %}
+{% block topbar_context %}Administración{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>👥 Gestión de Usuarios</h2>
-    <a href="{% url 'catalogo' %}" class="btn btn-outline-secondary">← Volver al Catálogo</a>
+<div class="sl-page-header">
+    <div>
+        <span class="sl-eyebrow">Administración</span>
+        <h1 class="sl-page-title">Gestión de usuarios</h1>
+        <p class="sl-page-subtitle">Revisa roles, estados de cuenta y sanciones vigentes.</p>
+    </div>
+    <div class="sl-page-actions">
+        <a href="{% url 'catalogo' %}" class="btn btn-ghost">
+            <svg class="sl-icon"><use href="#i-arrow-left"></use></svg>Volver al catálogo
+        </a>
+    </div>
 </div>
 
-<div class="card shadow">
+<div class="card sl-table-card">
+    <div class="card-header sl-card-header">
+        <div>
+            <h2>Usuarios registrados</h2>
+            <p>{{ usuarios|length }} cuenta(s) en el sistema</p>
+        </div>
+        <span class="sl-badge sl-badge--brand"><svg class="sl-icon sl-icon--sm"><use href="#i-users"></use></svg>Usuarios</span>
+    </div>
     <div class="card-body">
+        {% if usuarios %}
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-dark">
+            <table class="table sl-table">
+                <thead>
                     <tr>
                         <th>Usuario</th>
-                        <th>Nombre Completo</th>
+                        <th>Nombre completo</th>
                         <th>Email</th>
                         <th>Rol</th>
-                        <th>Estado de Cuenta</th>
+                        <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -24,34 +44,43 @@
                     <tr>
                         <td><strong>{{ u.username }}</strong></td>
                         <td>{{ u.first_name }} {{ u.last_name }}</td>
-                        <td>{{ u.email }}</td>
+                        <td class="sl-muted">{{ u.email }}</td>
                         <td>
                             {% if u.rol == 'administrador' %}
-                                <span class="badge bg-dark">Admin</span>
+                            <span class="sl-badge sl-badge--brand">Administrador</span>
                             {% elif u.rol == 'encargado' %}
-                                <span class="badge bg-info text-dark">Encargado</span>
+                            <span class="sl-badge sl-badge--info">Encargado</span>
                             {% else %}
-                                <span class="badge bg-secondary">Solicitante</span>
+                            <span class="sl-badge sl-badge--neutral">Solicitante</span>
                             {% endif %}
                         </td>
                         <td>
                             {% if u.tiene_sancion_activa %}
-                                <span class="badge bg-danger">Suspendido</span>
-                                {% if u.fecha_fin_sancion %}
-                                    <br><small>Hasta: {{ u.fecha_fin_sancion|date:"d/m/Y H:i" }}</small>
-                                {% endif %}
+                            <span class="sl-badge sl-badge--danger">Suspendido</span>
+                            {% if u.fecha_fin_sancion %}
+                            <div class="sl-text-xs sl-muted mt-1">Hasta {{ u.fecha_fin_sancion|date:"d/m/Y H:i" }}</div>
+                            {% endif %}
                             {% else %}
-                                <span class="badge bg-success">Activo</span>
+                            <span class="sl-badge sl-badge--success">Activo</span>
                             {% endif %}
                         </td>
                         <td>
-                            <a href="{% url 'editar_usuario_admin' u.id %}" class="btn btn-primary btn-sm">✏️ Editar</a>
+                            <a href="{% url 'editar_usuario_admin' u.id %}" class="btn btn-sm btn-outline-primary">
+                                <svg class="sl-icon sl-icon--sm"><use href="#i-edit"></use></svg>Editar
+                            </a>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        {% else %}
+        <div class="sl-empty">
+            <span class="sl-empty-icon"><svg class="sl-icon"><use href="#i-users"></use></svg></span>
+            <h3>Sin usuarios registrados</h3>
+            <p>Cuando alguien se registre en SmartLocker, aparecerá en esta tabla.</p>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

@@ -1,32 +1,68 @@
 {% extends 'base.html' %}
 
+{% block title %}Confirmar entrega — SmartLocker{% endblock %}
+{% block topbar_context %}Panel de despacho{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center mt-4">
-    <div class="col-md-6">
-        <div class="card shadow border-success">
-            <div class="card-header bg-success text-white">
-                <h4 class="mb-0">Confirmar Entrega de Equipo</h4>
-            </div>
+<div class="sl-page-header">
+    <div>
+        <span class="sl-eyebrow">Despacho</span>
+        <h1 class="sl-page-title">Confirmar entrega</h1>
+        <p class="sl-page-subtitle">Registra la salida física del equipo del pañol.</p>
+    </div>
+    <div class="sl-page-actions">
+        <a href="{% url 'panel_encargado' %}" class="btn btn-ghost">
+            <svg class="sl-icon"><use href="#i-arrow-left"></use></svg>Volver al panel
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-7 col-xl-6">
+        <div class="card">
             <div class="card-body">
-                <h5>{{ reserva.equipo.nombre }}</h5>
-                <p class="text-muted">Código: {{ reserva.equipo.codigo }}</p>
-                <hr>
-                <p><strong>Solicitante:</strong> {{ reserva.usuario.username }}</p>
-                <p><strong>Bloque horario:</strong> {{ reserva.bloque_horario }}</p>
-                <p><strong>Fecha de reserva:</strong> {{ reserva.fecha_creacion|date:"d M Y H:i" }}</p>
-                <hr>
-                <div class="alert alert-warning">
-                    Al confirmar, el equipo pasará a estado <strong>Prestado</strong>
-                    y la fecha límite de devolución será de <strong>24 horas</strong>.
+                <div class="sl-form-heading">
+                    <span class="sl-icon-tile sl-icon-tile--success"><svg class="sl-icon"><use href="#i-check"></use></svg></span>
+                    <div>
+                        <h2>Entrega de equipo</h2>
+                        <p>Verifica los datos antes de confirmar la entrega.</p>
+                    </div>
                 </div>
-                <form method="post">
+
+                <div class="sl-detail-panel">
+                    <span class="sl-icon-tile sl-icon-tile--neutral"><svg class="sl-icon"><use href="#i-box"></use></svg></span>
+                    <div>
+                        <h2>{{ reserva.equipo.nombre }}</h2>
+                        <p>Código: <strong>{{ reserva.equipo.codigo }}</strong></p>
+                    </div>
+                </div>
+
+                <dl class="sl-details mb-4">
+                    <div>
+                        <dt>Solicitante</dt>
+                        <dd>{{ reserva.usuario.get_full_name|default:reserva.usuario.username }}</dd>
+                    </div>
+                    <div>
+                        <dt>Cantidad</dt>
+                        <dd>{{ reserva.cantidad }} unidad(es)</dd>
+                    </div>
+                    <div>
+                        <dt>Día y horario solicitado</dt>
+                        <dd>{{ reserva.fecha_reserva|date:"d M Y"|default:"Sin fecha" }} · {{ reserva.bloque_horario }}</dd>
+                    </div>
+                </dl>
+
+                <div class="sl-alert sl-alert--warning mb-4">
+                    <svg class="sl-icon sl-icon--sm"><use href="#i-info"></use></svg>
+                    <span>Al confirmar, el equipo pasará a estado <strong>Prestado</strong> y la fecha límite de devolución será en <strong>24 horas</strong>.</span>
+                </div>
+
+                <form method="post" class="sl-form-actions">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-success w-100">
-                        ✅ Confirmar y Registrar Entrega
+                    <a href="{% url 'panel_encargado' %}" class="btn btn-outline-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-success">
+                        <svg class="sl-icon"><use href="#i-check"></use></svg>Confirmar y registrar
                     </button>
-                    <a href="{% url 'panel_encargado' %}" class="btn btn-secondary w-100 mt-2">
-                        Cancelar
-                    </a>
                 </form>
             </div>
         </div>

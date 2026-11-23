@@ -16,6 +16,23 @@ SmartLocker es un Producto Mínimo Viable (MVP) que automatiza el control de inv
 * **Frontend:** HTML5, CSS3 y Bootstrap 5
 * **Control de Versiones:** Git y GitHub
 
+## 🖼️ Créditos de imágenes del catálogo
+
+Las imágenes de prueba del catálogo se descargaron de Wikimedia Commons y se optimizaron a WebP (máximo 900 px):
+
+- HP EliteBook 840 G8 — Infinatious, CC BY-SA 4.0.
+- Lenovo ThinkPad X220 — Фосса, [CC BY-SA 4.0](https://commons.wikimedia.org/wiki/File:ThinkPad_x220_Tablet_-_Laptop_Mode.jpg).
+- Set Arduino — JrawX, [CC0](https://commons.wikimedia.org/wiki/File:Arduino_Uno_board.jpg).
+- iPad Air 11" — Wikimedia Commons.
+- Proyector Sharp Notevision XG-NV5XE — Wikimedia Commons.
+- Canon EOS 200D II — Wikimedia Commons.
+- Sennheiser RS 175 — Wikimedia Commons.
+- Mouse Logitech M331 Silent — Basana Saha, [CC BY-SA 4.0](https://commons.wikimedia.org/wiki/File:Logitech_M331_Silent_Mouse.jpg).
+- Teclado mecánico — SolarMainframe, [CC BY-SA 4.0](https://commons.wikimedia.org/wiki/File:Mechanical_Keyboard.jpg).
+- Monitor LG L194WT-SF — florisla, [CC BY-SA 2.0](https://commons.wikimedia.org/wiki/File:LG_L194WT-SF_LCD_monitor.jpg).
+- Tablet Samsung Galaxy Tab S5e — ماشین باز, [CC BY-SA 4.0](https://commons.wikimedia.org/wiki/File:Samsung_Galaxy_Tab_S5e.jpg).
+- Cámara web Logitech Brio 301 — Hayden Schiff, [CC BY 4.0](https://commons.wikimedia.org/wiki/File:Logitech_Brio_301_webcam_HS1.jpg).
+
 ## 🚀 Instrucciones de Instalación y Ejecución Local
 
 Sigue estos pasos para replicar el entorno de desarrollo en tu computadora:

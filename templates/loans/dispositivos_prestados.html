@@ -1,91 +1,103 @@
 {% extends 'base.html' %}
 
+{% block title %}Dispositivos prestados — SmartLocker{% endblock %}
+{% block topbar_context %}Préstamos activos{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>📦 Dispositivos Prestados</h2>
-    <a href="{% url 'panel_encargado' %}" class="btn btn-outline-secondary">
-        ← Volver al Panel
-    </a>
-</div>
-
-<div class="row mb-4">
-    <div class="col-md-6">
-        <div class="card border-primary shadow-sm">
-            <div class="card-body text-center">
-                <h5 class="text-muted">Préstamos Activos</h5>
-                <h2 class="display-4">{{ total_activos }}</h2>
-            </div>
-        </div>
+<div class="sl-page-header">
+    <div>
+        <span class="sl-eyebrow">Operaciones</span>
+        <h1 class="sl-page-title">Dispositivos prestados</h1>
+        <p class="sl-page-subtitle">Detalle de los equipos entregados y sus plazos de devolución.</p>
+    </div>
+    <div class="sl-page-actions">
+        <a href="{% url 'panel_encargado' %}" class="btn btn-ghost">
+            <svg class="sl-icon"><use href="#i-arrow-left"></use></svg>Volver al panel
+        </a>
     </div>
 </div>
 
-<div class="row">
-    <!-- Resumen por equipo -->
-    <div class="col-md-4">
-        <div class="card shadow mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">Resumen por Equipo</h5>
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card sl-table-card">
+            <div class="card-header sl-card-header">
+                <div>
+                    <h2>Resumen por equipo</h2>
+                    <p>Unidades prestadas actualmente</p>
+                </div>
             </div>
-            <ul class="list-group list-group-flush">
-                {% for r in resumen_por_equipo %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>
-                        {{ r.reserva__equipo__nombre }}
-                        <br><small class="text-muted">{{ r.reserva__equipo__codigo }}</small>
-                    </span>
-                    <span class="badge bg-primary rounded-pill">{{ r.cantidad }}</span>
-                </li>
-                {% empty %}
-                <li class="list-group-item text-muted">Sin préstamos activos.</li>
-                {% endfor %}
-            </ul>
+            <div class="card-body p-0">
+                {% if resumen_por_equipo %}
+                <div class="list-group list-group-flush">
+                    {% for r in resumen_por_equipo %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center gap-2 py-3">
+                        <div class="min-w-0">
+                            <strong class="d-block text-truncate">{{ r.reserva__equipo__nombre }}</strong>
+                            <small class="sl-muted">{{ r.reserva__equipo__codigo }}</small>
+                        </div>
+                        <span class="sl-badge sl-badge--brand">{{ r.cantidad }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="sl-empty">
+                    <span class="sl-empty-icon"><svg class="sl-icon"><use href="#i-box"></use></svg></span>
+                    <h3>Sin préstamos activos</h3>
+                    <p>No hay equipos entregados en este momento.</p>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 
-    <!-- Tabla detallada -->
-    <div class="col-md-8">
-        <div class="card shadow">
-            <div class="card-header bg-dark text-white">
-                <h5 class="mb-0">Detalle de Préstamos Activos</h5>
+    <div class="col-lg-8">
+        <div class="card sl-table-card">
+            <div class="card-header sl-card-header">
+                <div>
+                    <h2>Detalle de préstamos</h2>
+                    <p>{{ prestamos_activos|length }} préstamo(s) activos</p>
+                </div>
             </div>
             <div class="card-body">
                 {% if prestamos_activos %}
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
+                    <table class="table sl-table">
+                        <thead>
                             <tr>
-                                <th>#</th>
                                 <th>Equipo</th>
-                                <th>Cantidad</th>
+                                <th>Cant.</th>
                                 <th>Solicitante</th>
-                                <th>Fecha Límite</th>
+                                <th>Límite</th>
                                 <th>Estado</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for p in prestamos_activos %}
-                            <tr class="{% if p.esta_vencido %}table-danger{% endif %}">
-                                <td>{{ p.id }}</td>
+                            <tr>
                                 <td>
-                                    {{ p.reserva.equipo.nombre }}
-                                    <br><small class="text-muted">{{ p.reserva.equipo.codigo }}</small>
+                                    <strong>{{ p.reserva.equipo.nombre }}</strong>
+                                    <div class="sl-text-xs sl-muted">{{ p.reserva.equipo.codigo }}</div>
+                                    <div class="sl-text-xs sl-muted">{{ p.reserva.fecha_reserva|date:"d M Y"|default:"Sin fecha" }} · {{ p.reserva.bloque_horario }}</div>
                                 </td>
-                                <td>
-                                    <span class="badge bg-info">{{ p.reserva.cantidad }}</span>
-                                </td>
+                                <td><span class="sl-badge sl-badge--info">{{ p.reserva.cantidad }}</span></td>
                                 <td>{{ p.reserva.usuario.username }}</td>
-                                <td>{{ p.fecha_limite|date:"d M Y H:i" }}</td>
                                 <td>
+                                    {{ p.fecha_limite|date:"d M H:i" }}
                                     {% if p.esta_vencido %}
-                                    <span class="badge bg-danger">⚠️ Vencido</span>
-                                    {% else %}
-                                    <span class="badge bg-success">En plazo</span>
+                                    <div class="sl-text-xs text-danger fw-bold">¡Vencido!</div>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a href="{% url 'reportar_incidente' p.id %}" class="btn btn-warning btn-sm fw-bold">
-                                        🚩 Reportar
+                                    {% if p.esta_vencido %}
+                                    <span class="sl-badge sl-badge--danger">Atrasado</span>
+                                    {% else %}
+                                    <span class="sl-badge sl-badge--success">En plazo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'reportar_incidente' p.id %}" class="btn btn-sm btn-outline-danger">
+                                        <svg class="sl-icon sl-icon--sm"><use href="#i-alert"></use></svg>Reportar
                                     </a>
                                 </td>
                             </tr>
@@ -94,8 +106,10 @@
                     </table>
                 </div>
                 {% else %}
-                <div class="alert alert-info mb-0">
-                    No hay dispositivos prestados en este momento.
+                <div class="sl-empty">
+                    <span class="sl-empty-icon"><svg class="sl-icon"><use href="#i-package"></use></svg></span>
+                    <h3>Sin dispositivos prestados</h3>
+                    <p>Cuando se entregue una reserva, aparecerá en este detalle.</p>
                 </div>
                 {% endif %}
             </div>

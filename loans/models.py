@@ -12,6 +12,7 @@ class Reserva(models.Model):
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)
     bloque_horario = models.CharField(max_length=100, help_text="Ej: Lunes 10:00 - 12:00")
+    fecha_reserva = models.DateField(null=True, blank=True, help_text="Día solicitado para el préstamo")
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     estado = models.CharField(max_length=20, choices=ESTADOS_RESERVA, default='pendiente')
     cantidad = models.PositiveIntegerField(default=1)     

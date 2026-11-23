@@ -27,7 +27,7 @@ def registro(request):
 @login_required
 def editar_perfil(request):
     if request.method == 'POST':
-        form = EditarPerfilForm(request.POST, instance=request.user)
+        form = EditarPerfilForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, "Tus datos personales se han actualizado correctamente.")

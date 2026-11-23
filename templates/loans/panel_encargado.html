@@ -1,65 +1,93 @@
 {% extends 'base.html' %}
 
+{% block title %}Panel de despacho — SmartLocker{% endblock %}
+{% block topbar_context %}Panel de despacho{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>🔧 Panel del Encargado</h2>
-    <a href="{% url 'dispositivos_prestados' %}" class="btn btn-outline-primary">
-        Ver Dispositivos Prestados ({{ total_prestamos_activos }})
-    </a>
-</div>
-
-<div class="row g-3 mb-4">
-    <div class="col-12 col-md-6 col-xl-4">
-        <div class="card border-warning shadow-sm kpi-card">
-            <div class="card-body text-center">
-                <h5 class="text-muted">Reservas Pendientes de Entrega</h5>
-                <h2 class="display-4">{{ reservas_pendientes|length }}</h2>
-            </div>
-        </div>
+<div class="sl-page-header">
+    <div>
+        <span class="sl-eyebrow">Operaciones</span>
+        <h1 class="sl-page-title">Panel de despacho</h1>
+        <p class="sl-page-subtitle">Gestiona las reservas pendientes y el estado de los préstamos.</p>
     </div>
-    <div class="col-12 col-md-6 col-xl-4">
-        <div class="card border-info shadow-sm kpi-card">
-            <div class="card-body text-center">
-                <h5 class="text-muted">Préstamos Activos</h5>
-                <h2 class="display-4">{{ total_prestamos_activos }}</h2>
-            </div>
-        </div>
+    <div class="sl-page-actions">
+        <a href="{% url 'dispositivos_prestados' %}" class="btn btn-outline-primary">
+            <svg class="sl-icon"><use href="#i-package"></use></svg>Dispositivos prestados ({{ total_prestamos_activos }})
+        </a>
     </div>
 </div>
 
-<div class="card shadow">
-    <div class="card-header bg-dark text-white">
-        <h5 class="mb-0">Reservas Pendientes de Despacho</h5>
+<div class="row g-4 mb-4">
+    <div class="col-md-6 col-xl-4">
+        <div class="sl-metric sl-metric--warning">
+            <div class="sl-metric-top">
+                <span class="sl-metric-label">Reservas pendientes</span>
+                <span class="sl-metric-icon"><svg class="sl-icon"><use href="#i-clipboard"></use></svg></span>
+            </div>
+            <div class="sl-metric-value">{{ reservas_pendientes|length }}</div>
+            <p class="sl-metric-hint">Solicitudes esperando despacho</p>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-4">
+        <div class="sl-metric sl-metric--success">
+            <div class="sl-metric-top">
+                <span class="sl-metric-label">Préstamos activos</span>
+                <span class="sl-metric-icon"><svg class="sl-icon"><use href="#i-package"></use></svg></span>
+            </div>
+            <div class="sl-metric-value">{{ total_prestamos_activos }}</div>
+            <p class="sl-metric-hint">Equipos actualmente en poder de alumnos</p>
+        </div>
+    </div>
+</div>
+
+<div class="card sl-table-card">
+    <div class="card-header sl-card-header">
+        <div>
+            <h2>Reservas por despachar</h2>
+            <p>Revisa y entrega los equipos solicitados.</p>
+        </div>
+        <span class="sl-badge sl-badge--warning"><svg class="sl-icon sl-icon--sm"><use href="#i-clock"></use></svg>Pendientes</span>
     </div>
     <div class="card-body">
         {% if reservas_pendientes %}
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
+            <table class="table sl-table">
+                <thead>
                     <tr>
                         <th>#</th>
                         <th>Equipo</th>
-                        <th>Código</th>
                         <th>Cant.</th>
                         <th>Solicitante</th>
-                        <th>Bloque Horario</th>
-                        <th>Fecha Reserva</th>
-                        <th>Acción</th>
+                        <th>Día y horario</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for reserva in reservas_pendientes %}
                     <tr>
-                        <td>{{ reserva.id }}</td>
-                        <td>{{ reserva.equipo.nombre }}</td>
-                        <td><code>{{ reserva.equipo.codigo }}</code></td>
-                        <td><span class="badge bg-primary">{{ reserva.cantidad }}</span></td>
-                        <td>{{ reserva.usuario.username }}</td>
-                        <td>{{ reserva.bloque_horario }}</td>
-                        <td>{{ reserva.fecha_creacion|date:"d M Y H:i" }}</td>
+                        <td class="sl-muted">#{{ reserva.id }}</td>
                         <td>
-                            <a href="{% url 'confirmar_entrega' reserva.id %}" class="btn btn-success btn-sm mb-1">Confirmar Entrega</a>
-                            <a href="{% url 'cancelar_reserva_encargado' reserva.id %}" class="btn btn-outline-danger btn-sm mb-1">Cancelar</a>
+                            <strong>{{ reserva.equipo.nombre }}</strong>
+                            <div class="sl-text-xs sl-muted">{{ reserva.equipo.codigo }}</div>
+                        </td>
+                        <td><span class="sl-badge sl-badge--neutral">{{ reserva.cantidad }}</span></td>
+                        <td>
+                            <strong>{{ reserva.usuario.get_full_name|default:reserva.usuario.username }}</strong>
+                            <div class="sl-text-xs sl-muted">{{ reserva.fecha_creacion|date:"d M H:i" }}</div>
+                        </td>
+                        <td>
+                            <strong>{{ reserva.fecha_reserva|date:"d M Y"|default:"Sin fecha" }}</strong>
+                            <div class="sl-text-xs sl-muted">{{ reserva.bloque_horario }}</div>
+                        </td>
+                        <td>
+                            <div class="table-actions">
+                                <a href="{% url 'confirmar_entrega' reserva.id %}" class="btn btn-sm btn-success">
+                                    <svg class="sl-icon sl-icon--sm"><use href="#i-check"></use></svg>Entregar
+                                </a>
+                                <a href="{% url 'cancelar_reserva_encargado' reserva.id %}" class="btn btn-sm btn-outline-danger">
+                                    <svg class="sl-icon sl-icon--sm"><use href="#i-close"></use></svg>Cancelar
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
@@ -67,8 +95,10 @@
             </table>
         </div>
         {% else %}
-        <div class="alert alert-info mb-0">
-            No hay reservas pendientes de despacho en este momento.
+        <div class="sl-empty">
+            <span class="sl-empty-icon sl-icon-tile--success"><svg class="sl-icon"><use href="#i-check"></use></svg></span>
+            <h3>Todo al día</h3>
+            <p>No hay reservas pendientes de despacho en este momento.</p>
         </div>
         {% endif %}
     </div>

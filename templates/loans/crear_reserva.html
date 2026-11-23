@@ -1,36 +1,135 @@
 {% extends 'base.html' %}
 
+{% block title %}Reservar equipo — SmartLocker{% endblock %}
+{% block topbar_context %}Reservas{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center mt-4">
-    <div class="col-md-6">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0">Reservar Equipo</h4>
-            </div>
+<div class="sl-page-header">
+    <div>
+        <span class="sl-eyebrow">Catálogo</span>
+        <h1 class="sl-page-title">Reservar equipo</h1>
+        <p class="sl-page-subtitle">Elige el día laborable, el horario disponible y la cantidad que necesitas.</p>
+    </div>
+    <div class="sl-page-actions">
+        <a href="{% url 'catalogo' %}" class="btn btn-ghost">
+            <svg class="sl-icon"><use href="#i-arrow-left"></use></svg>Volver al catálogo
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-xl-11">
+        <div class="card">
             <div class="card-body">
-                <h5>Equipo: {{ equipo.nombre }}</h5>
-                <p class="text-muted">Código: {{ equipo.codigo }}</p>
-                <hr>
-                
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label class="form-label">Seleccione el bloque horario:</label>
-                        <select name="bloque_horario" class="form-select" required>
-                            <option value="">-- Seleccione --</option>
-                            <option value="Lunes 08:00 - 10:00">Lunes 08:00 - 10:00</option>
-                            <option value="Lunes 10:00 - 12:00">Lunes 10:00 - 12:00</option>
-                            <option value="Martes 14:00 - 16:00">Martes 14:00 - 16:00</option>
-                        </select>
+                <div class="sl-form-heading mb-4">
+                    <span class="sl-icon-tile"><svg class="sl-icon"><use href="#i-calendar"></use></svg></span>
+                    <div>
+                        <h2>Solicitud de reserva</h2>
+                        <p>El calendario considera de lunes a viernes y muestra solo los horarios con stock libre.</p>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Cantidad a reservar (Máx: {{ equipo.stock }}):</label>
-                        <input type="number" name="cantidad" class="form-control" value="1" min="1" max="{{ equipo.stock }}" required>
+                </div>
+
+                <div class="sl-detail-panel mb-4">
+                    {% if equipo.imagen %}
+                    <img src="{{ equipo.imagen.url }}" alt="{{ equipo.nombre }}">
+                    {% else %}
+                    <span class="sl-icon-tile sl-icon-tile--neutral"><svg class="sl-icon"><use href="#i-box"></use></svg></span>
+                    {% endif %}
+                    <div>
+                        <h2>{{ equipo.nombre }}</h2>
+                        <p>Código: <strong>{{ equipo.codigo }}</strong> · Stock total: <strong>{{ equipo.stock }}</strong></p>
+                    </div>
+                </div>
+
+                {{ calendario|json_script:"sl-calendario-data" }}
+
+                <form method="post" id="slReservaForm" class="sl-booking-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="fecha_reserva" id="id_fecha_reserva">
+                    <input type="hidden" name="bloque_horario" id="id_bloque_horario">
+
+                    <div class="sl-booking-grid">
+                        <section class="sl-calendar-panel" aria-label="Calendario de reservas">
+                            <div class="sl-calendar-head">
+                                <button type="button" class="sl-icon-button" id="slMesAnterior" aria-label="Mes anterior">
+                                    <svg class="sl-icon"><use href="#i-arrow-left"></use></svg>
+                                </button>
+                                <h3 id="slMesTitulo">Selecciona una fecha</h3>
+                                <button type="button" class="sl-icon-button" id="slMesSiguiente" aria-label="Mes siguiente">
+                                    <svg class="sl-icon"><use href="#i-arrow-right"></use></svg>
+                                </button>
+                            </div>
+
+                            <div class="sl-calendar-weekdays" aria-hidden="true">
+                                <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span>
+                            </div>
+                            <div class="sl-calendar-grid" id="slCalendarGrid" role="grid"></div>
+
+                            <div class="sl-calendar-legend">
+                                <span><i class="sl-legend-dot is-free"></i>Con horas libres</span>
+                                <span><i class="sl-legend-dot is-full"></i>Sin cupo</span>
+                                <span><i class="sl-legend-dot is-off"></i>No laborable</span>
+                            </div>
+                        </section>
+
+                        <aside class="sl-booking-side">
+                            <div class="sl-summary-card">
+                                <span class="sl-eyebrow">Tu reserva</span>
+                                <div class="sl-summary-row">
+                                    <svg class="sl-icon sl-icon--sm"><use href="#i-calendar"></use></svg>
+                                    <div>
+                                        <small>Fecha</small>
+                                        <strong id="slResumenFecha">Aún no seleccionas fecha</strong>
+                                    </div>
+                                </div>
+                                <div class="sl-summary-row">
+                                    <svg class="sl-icon sl-icon--sm"><use href="#i-clock"></use></svg>
+                                    <div>
+                                        <small>Horario</small>
+                                        <strong id="slResumenHora">Selecciona una fecha primero</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="sl-slots-card">
+                                <h3>Horarios disponibles</h3>
+                                <div class="sl-slots-list" id="slSlotsList">
+                                    <p class="sl-muted sl-text-xs mb-0">Selecciona una fecha del calendario para ver los horarios.</p>
+                                </div>
+                            </div>
+
+                            <div class="sl-quantity-card">
+                                <div>
+                                    <span class="sl-eyebrow">Cantidad</span>
+                                    <strong class="sl-quantity-value" id="slCantidadValor">—</strong>
+                                    <small class="sl-muted" id="slCantidadDetalle">Elige un horario para activar el selector.</small>
+                                    <div class="sl-quantity-buttons">
+                                        <button type="button" class="sl-icon-button" id="slCantidadMenos" aria-label="Disminuir cantidad">−</button>
+                                        <button type="button" class="sl-icon-button" id="slCantidadMas" aria-label="Aumentar cantidad">+</button>
+                                    </div>
+                                </div>
+                                <div class="sl-quantity-slider">
+                                    <input type="range" name="cantidad" id="id_cantidad" min="1" max="1" value="1" step="1" disabled aria-label="Cantidad a reservar">
+                                    <span class="sl-quantity-track-label">1</span>
+                                    <span class="sl-quantity-track-label" id="slCantidadMax">—</span>
+                                </div>
+                            </div>
+                        </aside>
                     </div>
 
-                    <!-- Botón de confirmar -->
-                    <button type="submit" class="btn btn-success w-100">Confirmar Reserva</button>
-                    <a href="{% url 'catalogo' %}" class="btn btn-secondary w-100 mt-2">Cancelar</a>
+                    <noscript>
+                        <div class="sl-alert sl-alert--warning mt-4">
+                            <svg class="sl-icon sl-icon--sm"><use href="#i-alert"></use></svg>
+                            <span>Activa JavaScript para usar el calendario de reservas.</span>
+                        </div>
+                    </noscript>
+
+                    <div class="sl-form-actions">
+                        <a href="{% url 'catalogo' %}" class="btn btn-outline-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary" id="slSubmitReserva" disabled>
+                            <svg class="sl-icon"><use href="#i-check"></use></svg>Confirmar reserva
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

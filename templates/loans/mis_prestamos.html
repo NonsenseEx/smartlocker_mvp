@@ -1,25 +1,74 @@
 {% extends 'base.html' %}
 
-{% block content %}
-<h2 class="mb-4">Mis Préstamos Activos</h2>
+{% block title %}Mis préstamos — SmartLocker{% endblock %}
+{% block topbar_context %}Mis préstamos{% endblock %}
 
-<div class="row">
+{% block content %}
+<div class="sl-page-header">
+    <div>
+        <span class="sl-eyebrow">Préstamos</span>
+        <h1 class="sl-page-title">Mis préstamos activos</h1>
+        <p class="sl-page-subtitle">Gestiona la devolución de los equipos que están en tu poder.</p>
+    </div>
+    <div class="sl-page-actions">
+        <a href="{% url 'catalogo' %}" class="btn btn-outline-primary">
+            <svg class="sl-icon"><use href="#i-plus"></use></svg>Nueva reserva
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
     {% for prestamo in prestamos %}
-    <div class="col-md-6 mb-3">
-        <div class="card shadow-sm border-warning">
-            <div class="card-header bg-warning text-dark">
-                Equipo: {{ prestamo.reserva.equipo.nombre }}
-            </div>
-            <div class="card-body">
-                <p><strong>Fecha de salida:</strong> {{ prestamo.fecha_salida|date:"d M Y, H:i" }}</p>
-                <p><strong>Fecha límite:</strong> {{ prestamo.fecha_limite|date:"d M Y, H:i" }}</p>
-                <a href="{% url 'devolver_mi_equipo' prestamo.id %}" class="btn btn-danger w-100">Devolver Equipo</a>
+    <div class="col-md-6 col-xl-4">
+        <div class="card h-100 sl-product-card">
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+                    <h2 class="h5 mb-0">{{ prestamo.reserva.equipo.nombre }}</h2>
+                    <span class="sl-badge sl-badge--warning">En tu poder</span>
+                </div>
+
+                <p class="sl-product-meta mb-3">Código <strong>{{ prestamo.reserva.equipo.codigo }}</strong></p>
+
+                <dl class="sl-details mb-3">
+                    <div>
+                        <dt>Reserva solicitada</dt>
+                        <dd>{{ prestamo.reserva.fecha_reserva|date:"d M Y"|default:"Sin fecha" }} · {{ prestamo.reserva.bloque_horario }}</dd>
+                    </div>
+                    <div>
+                        <dt>Fecha de salida</dt>
+                        <dd>{{ prestamo.fecha_salida|date:"d M Y, H:i" }}</dd>
+                    </div>
+                    <div>
+                        <dt>Fecha límite</dt>
+                        <dd class="{% if prestamo.esta_vencido %}text-danger{% endif %}">{{ prestamo.fecha_limite|date:"d M Y, H:i" }}</dd>
+                    </div>
+                </dl>
+
+                {% if prestamo.esta_vencido %}
+                <div class="sl-alert sl-alert--danger sl-text-xs mb-3">
+                    <svg class="sl-icon sl-icon--sm"><use href="#i-alert"></use></svg>
+                    <span>Superaste el plazo de devolución. Se aplicará una sanción.</span>
+                </div>
+                {% endif %}
+
+                <div class="mt-auto">
+                    <a href="{% url 'devolver_mi_equipo' prestamo.id %}" class="btn btn-outline-primary sl-full-width">
+                        <svg class="sl-icon"><use href="#i-refresh"></use></svg>Devolver equipo
+                    </a>
+                </div>
             </div>
         </div>
     </div>
     {% empty %}
     <div class="col-12">
-        <div class="alert alert-info">No tienes préstamos activos en este momento.</div>
+        <div class="card">
+            <div class="sl-empty">
+                <span class="sl-empty-icon"><svg class="sl-icon"><use href="#i-package"></use></svg></span>
+                <h3>No tienes préstamos activos</h3>
+                <p>Cuando reserves un equipo, aparecerá aquí para que puedas gestionar su devolución.</p>
+                <a href="{% url 'catalogo' %}" class="btn btn-primary">Ir al catálogo</a>
+            </div>
+        </div>
     </div>
     {% endfor %}
 </div>

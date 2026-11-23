@@ -1,29 +1,68 @@
 {% extends 'base.html' %}
 
+{% block title %}Cancelar reserva — SmartLocker{% endblock %}
+{% block topbar_context %}Panel de despacho{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center mt-4">
-    <div class="col-md-6">
-        <div class="card shadow border-danger">
-            <div class="card-header bg-danger text-white">
-                <h4 class="mb-0">Cancelar Reserva</h4>
-            </div>
+<div class="sl-page-header">
+    <div>
+        <span class="sl-eyebrow">Despacho</span>
+        <h1 class="sl-page-title">Cancelar reserva</h1>
+        <p class="sl-page-subtitle">Confirma la cancelación y notifica al solicitante.</p>
+    </div>
+    <div class="sl-page-actions">
+        <a href="{% url 'panel_encargado' %}" class="btn btn-ghost">
+            <svg class="sl-icon"><use href="#i-arrow-left"></use></svg>Volver al panel
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-7 col-xl-6">
+        <div class="card">
             <div class="card-body">
-                <h5>Equipo: {{ reserva.equipo.nombre }}</h5>
-                <p class="text-muted">Código: {{ reserva.equipo.codigo }}</p>
-                <hr>
-                <p><strong>Solicitante:</strong> {{ reserva.usuario.username }}</p>
-                <p><strong>Cantidad solicitada:</strong> {{ reserva.cantidad }}</p>
-                <p><strong>Bloque horario:</strong> {{ reserva.bloque_horario }}</p>
-                <hr>
-                
-                <div class="alert alert-warning">
-                    ¿Estás seguro de que deseas cancelar esta reserva? El equipo volverá a estar disponible para otros usuarios y se le notificará al alumno.
+                <div class="sl-form-heading">
+                    <span class="sl-icon-tile sl-icon-tile--danger"><svg class="sl-icon"><use href="#i-close"></use></svg></span>
+                    <div>
+                        <h2>Cancelación de reserva</h2>
+                        <p>El equipo volverá a estar disponible para otros usuarios.</p>
+                    </div>
                 </div>
-                
-                <form method="post">
+
+                <div class="sl-detail-panel">
+                    <span class="sl-icon-tile sl-icon-tile--neutral"><svg class="sl-icon"><use href="#i-box"></use></svg></span>
+                    <div>
+                        <h2>{{ reserva.equipo.nombre }}</h2>
+                        <p>Código: <strong>{{ reserva.equipo.codigo }}</strong></p>
+                    </div>
+                </div>
+
+                <dl class="sl-details mb-4">
+                    <div>
+                        <dt>Solicitante</dt>
+                        <dd>{{ reserva.usuario.username }}</dd>
+                    </div>
+                    <div>
+                        <dt>Cantidad solicitada</dt>
+                        <dd>{{ reserva.cantidad }}</dd>
+                    </div>
+                    <div>
+                        <dt>Día y horario solicitado</dt>
+                        <dd>{{ reserva.fecha_reserva|date:"d M Y"|default:"Sin fecha" }} · {{ reserva.bloque_horario }}</dd>
+                    </div>
+                </dl>
+
+                <div class="sl-alert sl-alert--warning mb-4">
+                    <svg class="sl-icon sl-icon--sm"><use href="#i-alert"></use></svg>
+                    <span>¿Estás seguro de cancelar esta reserva? Se enviará una notificación al alumno.</span>
+                </div>
+
+                <form method="post" class="sl-form-actions">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-danger w-100">Sí, Cancelar Reserva</button>
-                    <a href="{% url 'panel_encargado' %}" class="btn btn-secondary w-100 mt-2">Volver al Panel</a>
+                    <a href="{% url 'panel_encargado' %}" class="btn btn-outline-secondary">Volver al panel</a>
+                    <button type="submit" class="btn btn-danger">
+                        <svg class="sl-icon"><use href="#i-close"></use></svg>Sí, cancelar reserva
+                    </button>
                 </form>
             </div>
         </div>

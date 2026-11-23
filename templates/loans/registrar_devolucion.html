@@ -1,33 +1,75 @@
 {% extends 'base.html' %}
 
+{% block title %}Registrar devolución — SmartLocker{% endblock %}
+{% block topbar_context %}Préstamos activos{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center mt-4">
-    <div class="col-md-6">
-        <div class="card shadow border-warning">
-            <div class="card-header bg-warning text-dark">
-                <h4 class="mb-0">Registrar Devolución</h4>
-            </div>
+<div class="sl-page-header">
+    <div>
+        <span class="sl-eyebrow">Devolución</span>
+        <h1 class="sl-page-title">Registrar devolución</h1>
+        <p class="sl-page-subtitle">Confirma el estado del equipo al momento de recibirlo.</p>
+    </div>
+    <div class="sl-page-actions">
+        <a href="{% url 'catalogo' %}" class="btn btn-ghost">
+            <svg class="sl-icon"><use href="#i-arrow-left"></use></svg>Volver al catálogo
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-7 col-xl-6">
+        <div class="card">
             <div class="card-body">
-                <h5>Equipo: {{ prestamo.reserva.equipo.nombre }}</h5>
-                <p class="text-muted">Código: {{ prestamo.reserva.equipo.codigo }}</p>
-                <p><strong>Prestado a:</strong> {{ prestamo.reserva.usuario.username }}</p>
-                <p><strong>Fecha Límite:</strong> {{ prestamo.fecha_limite|date:"d M Y, H:i" }}</p>
-                <hr>
-                
-                <form method="post">
+                <div class="sl-form-heading">
+                    <span class="sl-icon-tile sl-icon-tile--warning"><svg class="sl-icon"><use href="#i-refresh"></use></svg></span>
+                    <div>
+                        <h2>Recepción de equipo</h2>
+                        <p>Revisa los datos del préstamo antes de finalizar.</p>
+                    </div>
+                </div>
+
+                <div class="sl-detail-panel">
+                    <span class="sl-icon-tile sl-icon-tile--neutral"><svg class="sl-icon"><use href="#i-box"></use></svg></span>
+                    <div>
+                        <h2>{{ prestamo.reserva.equipo.nombre }}</h2>
+                        <p>Código: <strong>{{ prestamo.reserva.equipo.codigo }}</strong></p>
+                    </div>
+                </div>
+
+                <dl class="sl-details mb-4">
+                    <div>
+                        <dt>Día y horario reservado</dt>
+                        <dd>{{ prestamo.reserva.fecha_reserva|date:"d M Y"|default:"Sin fecha" }} · {{ prestamo.reserva.bloque_horario }}</dd>
+                    </div>
+                    <div>
+                        <dt>Prestado a</dt>
+                        <dd>{{ prestamo.reserva.usuario.username }}</dd>
+                    </div>
+                    <div>
+                        <dt>Fecha límite</dt>
+                        <dd>{{ prestamo.fecha_limite|date:"d M Y, H:i" }}</dd>
+                    </div>
+                </dl>
+
+                <form method="post" class="sl-stack-sm">
                     {% csrf_token %}
-                    <div class="mb-3">
-                        <label class="form-label">Estado del equipo al recibirlo:</label>
-                        <select name="estado_equipo" class="form-select" required>
+                    <div>
+                        <label class="form-label" for="id_estado_equipo">ESTADO DEL EQUIPO AL RECIBIRLO</label>
+                        <select name="estado_equipo" id="id_estado_equipo" class="form-select" required>
                             <option value="">-- Seleccione --</option>
-                            <option value="operativo">Operativo (Buen estado)</option>
-                            <option value="danado">Dañado (Requiere mantenimiento)</option>
-                            <option value="faltante">Faltante (Componentes perdidos)</option>
+                            <option value="operativo">Operativo (buen estado)</option>
+                            <option value="danado">Dañado (requiere mantenimiento)</option>
+                            <option value="faltante">Faltante (componentes perdidos)</option>
                         </select>
                     </div>
-                    
-                    <button type="submit" class="btn btn-warning w-100 fw-bold">Finalizar Devolución</button>
-                    <a href="{% url 'catalogo' %}" class="btn btn-secondary w-100 mt-2">Cancelar</a>
+
+                    <div class="sl-form-actions">
+                        <a href="{% url 'catalogo' %}" class="btn btn-outline-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">
+                            <svg class="sl-icon"><use href="#i-check"></use></svg>Finalizar devolución
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

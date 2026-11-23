@@ -1,34 +1,45 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Iniciar sesión — SmartLocker{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center mt-5">
-    <div class="col-md-5 col-lg-4">
-        <div class="card shadow auth-card">
-            <div class="card-header text-center">
-                <span class="d-block fs-1 mb-1">🔐</span>
-                <h4 class="mb-0">Ingreso a SmartLocker</h4>
-                <small class="text-muted">Pañol universitario</small>
+<div class="sl-auth-card">
+    <div class="card shadow-lg">
+        <div class="card-body">
+            <div class="sl-auth-brand">
+                <img src="{% static 'img/logo_inacap.png' %}" alt="INACAP">
             </div>
-            <div class="card-body">
-                <h3 class="text-center mb-4 h5">Bienvenido de nuevo</h3>
-                
-                <!-- Si el usuario se equivoca, mostramos error -->
-                {% if form.errors %}
-                    <div class="alert alert-danger">Usuario o contraseña incorrectos.</div>
-                {% endif %}
 
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label class="form-label">Usuario:</label>
-                        <input type="text" name="username" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Contraseña:</label>
-                        <input type="password" name="password" class="form-control" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Ingresar</button>
-                </form>
+            <div class="sl-auth-heading">
+                <h1>Bienvenido</h1>
+                <p>Ingresa tus credenciales para acceder al pañol</p>
+            </div>
+
+            {% if form.errors %}
+            <div class="sl-alert sl-alert--danger mb-4" role="alert">
+                <svg class="sl-icon sl-icon--sm"><use href="#i-alert"></use></svg>
+                <span>Usuario o contraseña incorrectos. Inténtalo nuevamente.</span>
+            </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label" for="id_username">USUARIO</label>
+                    <input type="text" name="username" id="id_username" class="form-control form-control-lg" placeholder="Ej: juan.perez" autocomplete="username" required autofocus>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label" for="id_password">CONTRASEÑA</label>
+                    <input type="password" name="password" id="id_password" class="form-control form-control-lg" placeholder="••••••••" autocomplete="current-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg sl-full-width">
+                    <svg class="sl-icon"><use href="#i-lock"></use></svg>Ingresar
+                </button>
+            </form>
+
+            <div class="sl-auth-footer">
+                ¿No tienes cuenta? <a href="{% url 'registro' %}" class="fw-semibold">Regístrate aquí</a>
             </div>
         </div>
     </div>

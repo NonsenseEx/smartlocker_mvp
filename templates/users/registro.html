@@ -1,32 +1,43 @@
 {% extends 'base.html' %}
 
+{% block title %}Crear cuenta — SmartLocker{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center mt-5">
-    <div class="col-md-6">
-        <div class="card shadow">
-            <div class="card-header bg-success text-white">
-                <h4 class="mb-0">Crear una Cuenta en SmartLocker</h4>
+<div class="sl-auth-card">
+    <div class="card shadow-lg">
+        <div class="card-body">
+            <div class="sl-auth-brand">
+                <span class="sl-icon-tile">
+                    <svg class="sl-icon"><use href="#i-user"></use></svg>
+                </span>
             </div>
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    {% for field in form %}
-                        <div class="mb-3">
-                            <label class="form-label">{{ field.label }}</label>
-                            {{ field }}
-                            {% if field.help_text %}
-                                <div class="form-text text-muted small">{{ field.help_text|safe }}</div>
-                            {% endif %}
-                            {% if field.errors %}
-                                <div class="text-danger">{{ field.errors }}</div>
-                            {% endif %}
-                        </div>
-                    {% endfor %}
-                    <button type="submit" class="btn btn-success w-100">Registrarme</button>
-                </form>
-                <div class="text-center mt-3">
-                    <a href="{% url 'login' %}">¿Ya tienes cuenta? Inicia sesión aquí</a>
+
+            <div class="sl-auth-heading">
+                <h1>Crear cuenta</h1>
+                <p>Regístrate para reservar equipos del pañol</p>
+            </div>
+
+            <form method="post" class="sl-stack-sm">
+                {% csrf_token %}
+                {% for field in form %}
+                <div>
+                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label|upper }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                    <div class="form-text">{{ field.help_text|safe }}</div>
+                    {% endif %}
+                    {% if field.errors %}
+                    <div class="sl-field-error">{{ field.errors }}</div>
+                    {% endif %}
                 </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary btn-lg sl-full-width mt-3">
+                    <svg class="sl-icon"><use href="#i-check"></use></svg>Registrarme
+                </button>
+            </form>
+
+            <div class="sl-auth-footer">
+                ¿Ya tienes cuenta? <a href="{% url 'login' %}" class="fw-semibold">Inicia sesión aquí</a>
             </div>
         </div>
     </div>

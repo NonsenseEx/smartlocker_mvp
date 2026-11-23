@@ -19,6 +19,8 @@ class Equipo(models.Model):
     estado = models.CharField(max_length=20, choices=ESTADOS, default='disponible')
     stock = models.PositiveIntegerField(default=1, help_text="Cantidad total en el pañol")
     imagen = models.ImageField(upload_to='equipos/', null=True, blank=True, help_text="Foto del equipo")
+    disponible_desde = models.DateField(null=True, blank=True, help_text="Fecha desde la cual el equipo puede reservarse")
+    disponible_hasta = models.DateField(null=True, blank=True, help_text="Fecha hasta la cual el equipo puede reservarse")
 
     def __str__(self):
         return f"{self.codigo} - {self.nombre} ({self.get_estado_display()})"

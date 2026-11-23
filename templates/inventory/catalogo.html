@@ -1,43 +1,105 @@
 {% extends 'base.html' %}
 
+{% block title %}Catálogo de equipos — SmartLocker{% endblock %}
+{% block topbar_context %}Catálogo de equipos{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Catálogo de Equipos</h2>
+<div class="sl-page-header">
+    <div>
+        <span class="sl-eyebrow">Pañol universitario</span>
+        <h1 class="sl-page-title">Catálogo de equipos</h1>
+        <p class="sl-page-subtitle">Explora los equipos disponibles y reserva el que necesitas para tu jornada.</p>
+    </div>
+    <div class="sl-page-actions">
+        <span class="sl-badge sl-badge--brand"><svg class="sl-icon sl-icon--sm"><use href="#i-box"></use></svg>{{ resumen.total_equipos }} equipos</span>
+    </div>
+</div>
+
+<div class="sl-catalog-summary mb-4">
+    <span><strong>{{ resumen.stock_total }}</strong> unidades en el pañol</span>
+    <span><strong>{{ resumen.equipos_disponibles }}</strong> equipos disponibles</span>
+    <span><svg class="sl-icon sl-icon--sm"><use href="#i-clock"></use></svg> Bloques actualizados en tiempo real</span>
 </div>
 
 <div class="row g-4">
     {% for equipo in equipos %}
     <div class="col-md-6 col-xl-4">
-        <div class="card shadow-sm equipo-card h-100">
-            <div class="card-body d-flex flex-column">
-                <h5 class="card-title">{{ equipo.nombre }}</h5>
-                <h6 class="card-subtitle mb-2 text-muted">Código: {{ equipo.codigo }}</h6>
-                <p class="card-text">
-                    <strong>Categoría:</strong> {{ equipo.categoria.nombre }}<br>
-                    <strong>Stock:</strong> {{ equipo.stock }}<br>
-                    
-                    <!-- Lógica visual según el estado -->
-                    <strong>Estado:</strong> 
-                    {% if equipo.estado == 'disponible' %}
-                        <span class="badge bg-success">{{ equipo.get_estado_display }}</span>
-                    {% elif equipo.estado == 'prestado' %}
-                        <span class="badge bg-warning text-dark">{{ equipo.get_estado_display }}</span>
-                    {% else %}
-                        <span class="badge bg-danger">{{ equipo.get_estado_display }}</span>
-                    {% endif %}
-                </p>
-                
-                {% if equipo.estado == 'disponible' %}
-                    <a href="{% url 'crear_reserva' equipo.id %}" class="btn btn-primary w-100 mt-auto">Reservar Equipo</a>
+        <div class="card sl-product-card h-100">
+            <div class="sl-product-image">
+                {% if equipo.imagen %}
+                <img src="{{ equipo.imagen.url }}" alt="{{ equipo.nombre }}">
                 {% else %}
-                    <button class="btn btn-secondary w-100 mt-auto" disabled>No Disponible</button>
+                <svg class="sl-icon"><use href="#i-box"></use></svg>
                 {% endif %}
+            </div>
+
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                    <h2 class="h5 mb-0">{{ equipo.nombre }}</h2>
+                    {% if equipo.estado == 'disponible' %}
+                    <span class="sl-badge sl-badge--success">Disponible</span>
+                    {% elif equipo.estado == 'prestado' %}
+                    <span class="sl-badge sl-badge--warning">Prestado</span>
+                    {% else %}
+                    <span class="sl-badge sl-badge--danger">Mantenimiento</span>
+                    {% endif %}
+                </div>
+
+                <p class="sl-product-meta mb-3">Código <strong>{{ equipo.codigo }}</strong></p>
+
+                <dl class="sl-details mb-3">
+                    <div>
+                        <dt>Categoría</dt>
+                        <dd>{{ equipo.categoria.nombre }}</dd>
+                    </div>
+                    <div>
+                        <dt>Stock total</dt>
+                        <dd><span class="sl-badge sl-badge--neutral">{{ equipo.stock }} unidad(es)</span></dd>
+                    </div>
+                </dl>
+
+                {% if equipo.disponibilidad %}
+                <div class="sl-card-availability mb-4">
+                    <div class="sl-card-availability-head">
+                        <svg class="sl-icon sl-icon--sm"><use href="#i-calendar"></use></svg>
+                        <span>{{ equipo.disponibilidad.rango }}</span>
+                    </div>
+                    <div class="sl-card-availability-meta">
+                        {{ equipo.disponibilidad.bloques_libres }}/{{ equipo.disponibilidad.total_bloques }} bloques libres
+                    </div>
+                    {% if equipo.disponibilidad.proximos_libres %}
+                    <div class="sl-chip-list">
+                        {% for bloque in equipo.disponibilidad.proximos_libres %}
+                        <span class="sl-chip">{{ bloque }}</span>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="sl-text-xs text-danger fw-bold mt-2">Sin bloques disponibles</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <div class="mt-auto">
+                    {% if equipo.estado == 'disponible' and equipo.stock > 0 %}
+                    <a href="{% url 'crear_reserva' equipo.id %}" class="btn btn-primary sl-full-width">
+                        <svg class="sl-icon"><use href="#i-package"></use></svg>Reservar equipo
+                    </a>
+                    {% else %}
+                    <button class="btn btn-secondary sl-full-width" disabled>No disponible</button>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
     {% empty %}
     <div class="col-12">
-        <div class="alert alert-info">No hay equipos registrados en el pañol aún.</div>
+        <div class="card">
+            <div class="sl-empty">
+                <span class="sl-empty-icon"><svg class="sl-icon"><use href="#i-search"></use></svg></span>
+                <h3>No hay equipos registrados</h3>
+                <p>El pañol todavía no tiene equipos cargados en el catálogo.</p>
+            </div>
+        </div>
     </div>
     {% endfor %}
 </div>

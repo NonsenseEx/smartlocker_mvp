@@ -1,21 +1,40 @@
 {% extends 'base.html' %}
+
+{% block title %}Equipos defectuosos — SmartLocker{% endblock %}
+{% block topbar_context %}Inventario{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>🛠️ Equipos en Mantenimiento (Defectuosos)</h2>
-    <a href="{% url 'gestion_inventario' %}" class="btn btn-outline-secondary">← Volver al Inventario</a>
+<div class="sl-page-header">
+    <div>
+        <span class="sl-eyebrow">Operaciones</span>
+        <h1 class="sl-page-title">Equipos en mantenimiento</h1>
+        <p class="sl-page-subtitle">Equipos defectuosos o fuera de servicio que requieren revisión.</p>
+    </div>
+    <div class="sl-page-actions">
+        <a href="{% url 'gestion_inventario' %}" class="btn btn-ghost">
+            <svg class="sl-icon"><use href="#i-arrow-left"></use></svg>Volver al inventario
+        </a>
+    </div>
 </div>
 
-<div class="card shadow">
+<div class="card sl-table-card">
+    <div class="card-header sl-card-header">
+        <div>
+            <h2>Listado de equipos</h2>
+            <p>{{ equipos|length }} equipo(s) en mantenimiento</p>
+        </div>
+        <span class="sl-badge sl-badge--warning"><svg class="sl-icon sl-icon--sm"><use href="#i-wrench"></use></svg>Revisión</span>
+    </div>
     <div class="card-body">
         {% if equipos %}
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-dark">
+            <table class="table sl-table">
+                <thead>
                     <tr>
                         <th>Código</th>
                         <th>Equipo</th>
                         <th>Categoría</th>
-                        <th>Stock Actual</th>
+                        <th>Stock</th>
                         <th>Estado</th>
                     </tr>
                 </thead>
@@ -23,18 +42,21 @@
                     {% for equipo in equipos %}
                     <tr>
                         <td><code>{{ equipo.codigo }}</code></td>
-                        <td>{{ equipo.nombre }}</td>
-                        <td>{{ equipo.categoria.nombre }}</td>
-                        <td><span class="badge bg-danger">{{ equipo.stock }}</span></td>
-                        <td><span class="badge bg-warning text-dark">{{ equipo.get_estado_display }}</span></td>
+                        <td><strong>{{ equipo.nombre }}</strong></td>
+                        <td class="sl-muted">{{ equipo.categoria.nombre }}</td>
+                        <td><span class="sl-badge sl-badge--danger">{{ equipo.stock }}</span></td>
+                        <td><span class="sl-badge sl-badge--warning">{{ equipo.get_estado_display }}</span></td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
         {% else %}
-        <div class="alert alert-success mb-0">
-            ¡Buenas noticias! No hay equipos defectuosos en mantenimiento actualmente.
+        <div class="sl-empty">
+            <span class="sl-empty-icon sl-icon-tile--success"><svg class="sl-icon"><use href="#i-check"></use></svg></span>
+            <h3>Todo en orden</h3>
+            <p>No hay equipos defectuosos en mantenimiento actualmente.</p>
+            <a href="{% url 'gestion_inventario' %}" class="btn btn-outline-secondary">Ir al inventario</a>
         </div>
         {% endif %}
     </div>
